@@ -215,7 +215,6 @@ function renderStats(){
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function clearAll(){if(confirm('すべての記録を削除しますか？')){db={sleep:[],morning:[],day:[],diary:[]};save()}}
-$('start').value=isoLocal(new Date(Date.now()-8*3600000));$('end').value=isoLocal();
 if($('sleepDate') && !$('sleepDate').value) $('sleepDate').value=new Date().toISOString().slice(0,10);
 // タブはonclick属性に頼らず、JavaScriptから明示的に接続する
 function activateTab(id, btnId){
