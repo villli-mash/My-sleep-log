@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sleep Log v0.2</title>
+<title>Sleep Log v0.3</title>
 
 <style>
   * {
@@ -248,6 +248,15 @@
     margin-bottom: 12px;
   }
 
+  .safeNotice {
+    background: #eef7ee;
+    border: 1px solid #c9dfc9;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
   .radio-group {
     display: flex;
     gap: 8px;
@@ -278,6 +287,12 @@
     border-color: #222;
   }
 
+  .backupInfo {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+  }
+
   @media (max-width: 500px) {
     .row {
       grid-template-columns: 1fr;
@@ -285,6 +300,10 @@
 
     .three {
       grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .record-header {
+      flex-direction: column;
     }
   }
 </style>
@@ -294,7 +313,7 @@
 
 <header>
   <h1>Sleep Log</h1>
-  <p>睡眠記録 v0.2 — 「寝たのに眠い」も記録する</p>
+  <p>睡眠記録 v0.3 — 「寝たのに眠い」も記録する</p>
 </header>
 
 <main>
@@ -708,6 +727,44 @@
 
     <div class="card">
 
+      <h2>データ管理</h2>
+
+      <div class="safeNotice">
+        <strong>🔒 データを守る</strong><br>
+        過去の記録をたくさん入力する前に、
+        定期的にバックアップを保存してください。
+      </div>
+
+      <button class="secondary"
+              id="backupBtn"
+              style="width:100%;">
+        📦 データをバックアップ
+      </button>
+
+      <div style="height:8px;"></div>
+
+      <input
+        type="file"
+        id="restoreFile"
+        accept=".json,application/json"
+        style="display:none;">
+
+      <button class="secondary"
+              id="restoreBtn"
+              style="width:100%;">
+        📥 バックアップから復元
+      </button>
+
+      <div class="backupInfo">
+        バックアップはJSONファイルとして保存されます。
+        アプリを修正する前にも保存しておくと安心です。
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
       <h2>履歴</h2>
 
       <button class="danger"
@@ -748,15 +805,75 @@
 
 const KEY = 'sleepLogV01';
 
-let db = JSON.parse(
-  localStorage.getItem(KEY) ||
-  '{"sleep":[],"morning":[],"day":[],"diary":[]}'
-);
+const AUTO_BACKUP_KEY = 'sleepLogV01_autoBackup';
 
-if (!db.sleep) db.sleep = [];
-if (!db.morning) db.morning = [];
-if (!db.day) db.day = [];
-if (!db.diary) db.diary = [];
+const SCHEMA_VERSION = 1;
+
+
+/* =========================
+   データ読み込み
+========================= */
+
+function createEmptyDB() {
+
+  return {
+    sleep: [],
+    morning: [],
+    day: [],
+    diary: []
+  };
+
+}
+
+
+function loadDB() {
+
+  const raw = localStorage.getItem(KEY);
+
+  if (!raw) {
+    return createEmptyDB();
+  }
+
+  try {
+
+    const parsed = JSON.parse(raw);
+
+    if (!parsed || typeof parsed !== 'object') {
+      return createEmptyDB();
+    }
+
+    if (!Array.isArray(parsed.sleep)) {
+      parsed.sleep = [];
+    }
+
+    if (!Array.isArray(parsed.morning)) {
+      parsed.morning = [];
+    }
+
+    if (!Array.isArray(parsed.day)) {
+      parsed.day = [];
+    }
+
+    if (!Array.isArray(parsed.diary)) {
+      parsed.diary = [];
+    }
+
+    return parsed;
+
+  } catch (error) {
+
+    alert(
+      '保存されているデータを読み込めませんでした。'
+    );
+
+    return createEmptyDB();
+
+  }
+
+}
+
+
+let db = loadDB();
 
 let editingId = null;
 
@@ -765,13 +882,56 @@ const $ = id => document.getElementById(id);
 
 
 /* =========================
-   基本
+   基本保存
 ========================= */
 
 function saveDB() {
-  localStorage.setItem(KEY, JSON.stringify(db));
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(db)
+  );
+
 }
 
+
+/* =========================
+   変更前の自動バックアップ
+========================= */
+
+function backupBeforeChange() {
+
+  try {
+
+    const current = localStorage.getItem(KEY);
+
+    if (current) {
+
+      localStorage.setItem(
+        AUTO_BACKUP_KEY,
+        JSON.stringify({
+          savedAt: new Date().toISOString(),
+          data: JSON.parse(current)
+        })
+      );
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      '自動バックアップに失敗しました。',
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================
+   HTMLエスケープ
+========================= */
 
 function esc(value) {
 
@@ -785,12 +945,19 @@ function esc(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+
 }
 
 
+/* =========================
+   ID
+========================= */
+
 function makeId() {
+
   return Date.now().toString(36) +
     Math.random().toString(36).slice(2);
+
 }
 
 
@@ -807,6 +974,7 @@ function todayString() {
   const day = String(d.getDate()).padStart(2, '0');
 
   return `${y}-${m}-${day}`;
+
 }
 
 
@@ -822,9 +990,12 @@ if (!$('sleepDate').value) {
 function getRadio(name) {
 
   const checked =
-    document.querySelector(`input[name="${name}"]:checked`);
+    document.querySelector(
+      `input[name="${name}"]:checked`
+    );
 
   return checked ? checked.value : '';
+
 }
 
 
@@ -833,8 +1004,12 @@ function setRadio(name, value) {
   document.querySelectorAll(
     `input[name="${name}"]`
   ).forEach(input => {
-    input.checked = input.value === value;
+
+    input.checked =
+      input.value === value;
+
   });
+
 }
 
 
@@ -845,8 +1020,11 @@ function setRadio(name, value) {
 function getTags() {
 
   return Array.from(
-    document.querySelectorAll('input[name="tag"]:checked')
+    document.querySelectorAll(
+      'input[name="tag"]:checked'
+    )
   ).map(x => x.value);
+
 }
 
 
@@ -861,11 +1039,12 @@ function setTags(tags) {
       tags.includes(input.value);
 
   });
+
 }
 
 
 /* =========================
-   フォームのデータ取得
+   フォームデータ取得
 ========================= */
 
 function getFormData() {
@@ -887,32 +1066,62 @@ function getFormData() {
 
     activityLevel: $('activityLevel').value,
 
-    physicalLoad: getRadio('physicalLoad'),
-    mentalLoad: getRadio('mentalLoad'),
+    physicalLoad:
+      getRadio('physicalLoad'),
 
-    nightSleepiness: $('nightSleepiness').value,
-    wakeSleepiness: $('wakeSleepiness').value,
-    laterSleepiness: $('laterSleepiness').value,
+    mentalLoad:
+      getRadio('mentalLoad'),
 
-    getUpTime: $('getUpTime').value,
-    normalTime: $('normalTime').value,
+    nightSleepiness:
+      $('nightSleepiness').value,
 
-    wakeRecovery: $('wakeRecovery').value,
+    wakeSleepiness:
+      $('wakeSleepiness').value,
 
-    wakeNote: $('wakeNote').value,
-    sleepMemo: $('sleepMemo').value,
-    sleepMemo2: $('sleepMemo2').value,
+    laterSleepiness:
+      $('laterSleepiness').value,
 
-    medTime: $('medTime').value,
+    getUpTime:
+      $('getUpTime').value,
 
-    alcohol: $('alcohol').value,
-    alcoholType: $('alcoholType').value,
-    alcoholAmount: $('alcoholAmount').value,
-    alcoholAbv: $('alcoholAbv').value,
-    alcoholStart: $('alcoholStart').value,
-    alcoholEnd: $('alcoholEnd').value,
+    normalTime:
+      $('normalTime').value,
 
-    tags: getTags()
+    wakeRecovery:
+      $('wakeRecovery').value,
+
+    wakeNote:
+      $('wakeNote').value,
+
+    sleepMemo:
+      $('sleepMemo').value,
+
+    sleepMemo2:
+      $('sleepMemo2').value,
+
+    medTime:
+      $('medTime').value,
+
+    alcohol:
+      $('alcohol').value,
+
+    alcoholType:
+      $('alcoholType').value,
+
+    alcoholAmount:
+      $('alcoholAmount').value,
+
+    alcoholAbv:
+      $('alcoholAbv').value,
+
+    alcoholStart:
+      $('alcoholStart').value,
+
+    alcoholEnd:
+      $('alcoholEnd').value,
+
+    tags:
+      getTags()
 
   };
 
@@ -925,20 +1134,35 @@ function getFormData() {
 
 function fillForm(data) {
 
-  $('sleepDate').value = data.sleepDate || '';
+  $('sleepDate').value =
+    data.sleepDate || '';
 
-  $('bedTime').value = data.bedTime || '';
-  $('sleepTime').value = data.sleepTime || '';
-  $('finalWake').value = data.finalWake || '';
-  $('attemptWake').value = data.attemptWake || '';
+  $('bedTime').value =
+    data.bedTime || '';
 
-  $('resleep').value = data.resleep || '';
-  $('napText').value = data.napText || '';
+  $('sleepTime').value =
+    data.sleepTime || '';
 
-  $('lightTime').value = data.lightTime || '';
-  $('caffeineText').value = data.caffeineText || '';
+  $('finalWake').value =
+    data.finalWake || '';
 
-  $('activityLevel').value = data.activityLevel || '';
+  $('attemptWake').value =
+    data.attemptWake || '';
+
+  $('resleep').value =
+    data.resleep || '';
+
+  $('napText').value =
+    data.napText || '';
+
+  $('lightTime').value =
+    data.lightTime || '';
+
+  $('caffeineText').value =
+    data.caffeineText || '';
+
+  $('activityLevel').value =
+    data.activityLevel || '';
 
   setRadio(
     'physicalLoad',
@@ -1011,7 +1235,8 @@ function resetForm() {
 
   editingId = null;
 
-  $('sleepDate').value = todayString();
+  $('sleepDate').value =
+    todayString();
 
   [
     'bedTime',
@@ -1045,14 +1270,25 @@ function resetForm() {
   });
 
   $('activityLevel').value = '';
+
   $('wakeRecovery').value = '';
+
   $('alcohol').value = '';
 
-  setRadio('physicalLoad', '');
-  setRadio('mentalLoad', '');
+  setRadio(
+    'physicalLoad',
+    ''
+  );
+
+  setRadio(
+    'mentalLoad',
+    ''
+  );
+
   setTags([]);
 
-  $('editNotice').style.display = 'none';
+  $('editNotice').style.display =
+    'none';
 
   $('saveDiaryBtn').textContent =
     '記録を保存';
@@ -1073,17 +1309,27 @@ function addSleepDiary() {
 
   if (!data.sleepDate) {
 
-    alert('記録日を入力してください。');
+    alert(
+      '記録日を入力してください。'
+    );
 
     return;
   }
 
 
+  /*
+    変更前に自動バックアップ
+  */
+
+  backupBeforeChange();
+
+
   if (editingId) {
 
-    const index = db.diary.findIndex(
-      x => x.id === editingId
-    );
+    const index =
+      db.diary.findIndex(
+        x => x.id === editingId
+      );
 
     if (index !== -1) {
 
@@ -1091,12 +1337,15 @@ function addSleepDiary() {
         ...db.diary[index],
         ...data,
         id: editingId,
-        updatedAt: new Date().toISOString()
+        updatedAt:
+          new Date().toISOString()
       };
 
     }
 
-    alert('記録を更新しました。');
+    alert(
+      '記録を更新しました。'
+    );
 
   } else {
 
@@ -1106,11 +1355,14 @@ function addSleepDiary() {
 
       id: makeId(),
 
-      createdAt: new Date().toISOString()
+      createdAt:
+        new Date().toISOString()
 
     });
 
-    alert('記録を保存しました。');
+    alert(
+      '記録を保存しました。'
+    );
 
   }
 
@@ -1130,13 +1382,16 @@ function addSleepDiary() {
 
 function editDiary(id) {
 
-  const item = db.diary.find(
-    x => x.id === id
-  );
+  const item =
+    db.diary.find(
+      x => x.id === id
+    );
 
   if (!item) {
 
-    alert('記録が見つかりません。');
+    alert(
+      '記録が見つかりません。'
+    );
 
     return;
   }
@@ -1145,7 +1400,8 @@ function editDiary(id) {
 
   fillForm(item);
 
-  $('editNotice').style.display = 'block';
+  $('editNotice').style.display =
+    'block';
 
   $('saveDiaryBtn').textContent =
     '記録を更新';
@@ -1153,7 +1409,10 @@ function editDiary(id) {
   $('cancelEditBtn').style.display =
     'block';
 
-  activateTab('log', 'tabLog');
+  activateTab(
+    'log',
+    'tabLog'
+  );
 
   window.scrollTo({
     top: 0,
@@ -1169,23 +1428,30 @@ function editDiary(id) {
 
 function deleteDiary(id) {
 
-  const item = db.diary.find(
-    x => x.id === id
-  );
+  const item =
+    db.diary.find(
+      x => x.id === id
+    );
 
   if (!item) return;
 
 
   const ok = confirm(
-    `${item.sleepDate || 'この記録'}を削除しますか？\n\nこの操作は元に戻せません。`
+    `${item.sleepDate || 'この記録'}を削除しますか？\n\n` +
+    `削除前のデータは自動バックアップされます。`
   );
 
   if (!ok) return;
 
 
-  db.diary = db.diary.filter(
-    x => x.id !== id
-  );
+  backupBeforeChange();
+
+
+  db.diary =
+    db.diary.filter(
+      x => x.id !== id
+    );
+
 
   saveDB();
 
@@ -1200,24 +1466,39 @@ function deleteDiary(id) {
 
 function timeToMinutes(value) {
 
-  if (!value || !/^\d{1,2}:\d{2}$/.test(value)) {
+  if (
+    !value ||
+    !/^\d{1,2}:\d{2}$/.test(value)
+  ) {
     return null;
   }
 
-  const parts = value.split(':');
+  const parts =
+    value.split(':');
 
-  return Number(parts[0]) * 60 +
-         Number(parts[1]);
+  return (
+    Number(parts[0]) * 60 +
+    Number(parts[1])
+  );
 
 }
 
 
-function durationMinutes(start, end) {
+function durationMinutes(
+  start,
+  end
+) {
 
-  let s = timeToMinutes(start);
-  let e = timeToMinutes(end);
+  let s =
+    timeToMinutes(start);
 
-  if (s === null || e === null) {
+  let e =
+    timeToMinutes(end);
+
+  if (
+    s === null ||
+    e === null
+  ) {
     return null;
   }
 
@@ -1226,26 +1507,32 @@ function durationMinutes(start, end) {
   }
 
   return e - s;
+
 }
 
 
 function formatDuration(minutes) {
 
-  if (minutes === null ||
-      minutes === undefined ||
-      isNaN(minutes)) {
-
+  if (
+    minutes === null ||
+    minutes === undefined ||
+    isNaN(minutes)
+  ) {
     return '—';
   }
 
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
+  const h =
+    Math.floor(minutes / 60);
+
+  const m =
+    Math.round(minutes % 60);
 
   if (h === 0) {
     return `${m}分`;
   }
 
   return `${h}時間${m}分`;
+
 }
 
 
@@ -1269,9 +1556,12 @@ function getSleepMinutes(item) {
 
 function average(values) {
 
-  const nums = values
-    .map(Number)
-    .filter(x => !isNaN(x));
+  const nums =
+    values
+      .map(Number)
+      .filter(
+        x => !isNaN(x)
+      );
 
   if (!nums.length) {
     return null;
@@ -1291,7 +1581,8 @@ function average(values) {
 
 function renderHistory() {
 
-  const list = $('historyList');
+  const list =
+    $('historyList');
 
   if (!db.diary.length) {
 
@@ -1302,129 +1593,211 @@ function renderHistory() {
   }
 
 
-  const records = [...db.diary].sort(
-    (a, b) =>
-      String(b.sleepDate || '').localeCompare(
-        String(a.sleepDate || '')
-      )
-  );
+  const records =
+    [...db.diary].sort(
+      (a, b) =>
+        String(
+          b.sleepDate || ''
+        ).localeCompare(
+          String(
+            a.sleepDate || ''
+          )
+        )
+    );
 
 
-  list.innerHTML = records.map(item => {
+  list.innerHTML =
+    records.map(item => {
 
-    const sleepMinutes =
-      getSleepMinutes(item);
+      const sleepMinutes =
+        getSleepMinutes(item);
 
-    const tags =
-      Array.isArray(item.tags)
-        ? item.tags
-        : [];
+      const tags =
+        Array.isArray(item.tags)
+          ? item.tags
+          : [];
 
-    const tagHtml =
-      tags.map(tag =>
-        `<span class="tag">${esc(tag)}</span>`
-      ).join('');
+      const tagHtml =
+        tags
+          .map(
+            tag =>
+              `<span class="tag">${esc(tag)}</span>`
+          )
+          .join('');
 
 
-    return `
+      return `
 
-      <div class="record">
+        <div class="record">
 
-        <div class="record-header">
+          <div class="record-header">
 
-          <div class="record-date">
-            ${esc(item.sleepDate || '日付なし')}
+            <div class="record-date">
+              ${esc(
+                item.sleepDate ||
+                '日付なし'
+              )}
+            </div>
+
+            <div class="record-actions">
+
+              <button
+                class="editBtn"
+                data-edit-id="${esc(item.id)}">
+                編集
+              </button>
+
+              <button
+                class="danger"
+                data-delete-id="${esc(item.id)}">
+                削除
+              </button>
+
+            </div>
+
           </div>
 
-          <div class="record-actions">
 
-            <button
-              class="editBtn"
-              data-edit-id="${esc(item.id)}">
-              編集
-            </button>
+          <div class="record-body">
 
-            <button
-              class="danger"
-              data-delete-id="${esc(item.id)}">
-              削除
-            </button>
+            <div class="record-row">
+              <span class="record-label">
+                睡眠時間
+              </span>
+              <span>
+                ${formatDuration(
+                  sleepMinutes
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                就床
+              </span>
+              <span>
+                ${esc(
+                  item.bedTime || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                入眠
+              </span>
+              <span>
+                ${esc(
+                  item.sleepTime || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                最終起床
+              </span>
+              <span>
+                ${esc(
+                  item.finalWake || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                起床時の眠気
+              </span>
+              <span>
+                ${esc(
+                  item.wakeSleepiness || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                後の眠気
+              </span>
+              <span>
+                ${esc(
+                  item.laterSleepiness || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                活動量
+              </span>
+              <span>
+                ${esc(
+                  item.activityLevel || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                身体的負荷
+              </span>
+              <span>
+                ${esc(
+                  item.physicalLoad || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                精神的負荷
+              </span>
+              <span>
+                ${esc(
+                  item.mentalLoad || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                服薬時刻
+              </span>
+              <span>
+                ${esc(
+                  item.medTime || '—'
+                )}
+              </span>
+            </div>
+
+            <div class="record-row">
+              <span class="record-label">
+                昼寝
+              </span>
+              <span>
+                ${esc(
+                  item.napText || '—'
+                )}
+              </span>
+            </div>
+
+            ${
+              tagHtml
+                ? `
+                  <div style="margin-top:7px;">
+                    ${tagHtml}
+                  </div>
+                `
+                : ''
+            }
 
           </div>
 
         </div>
 
+      `;
 
-        <div class="record-body">
-
-          <div class="record-row">
-            <span class="record-label">睡眠時間</span>
-            <span>${formatDuration(sleepMinutes)}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">就床</span>
-            <span>${esc(item.bedTime || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">入眠</span>
-            <span>${esc(item.sleepTime || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">最終起床</span>
-            <span>${esc(item.finalWake || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">起床時の眠気</span>
-            <span>${esc(item.wakeSleepiness || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">後の眠気</span>
-            <span>${esc(item.laterSleepiness || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">活動量</span>
-            <span>${esc(item.activityLevel || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">身体的負荷</span>
-            <span>${esc(item.physicalLoad || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">精神的負荷</span>
-            <span>${esc(item.mentalLoad || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">服薬時刻</span>
-            <span>${esc(item.medTime || '—')}</span>
-          </div>
-
-          <div class="record-row">
-            <span class="record-label">昼寝</span>
-            <span>${esc(item.napText || '—')}</span>
-          </div>
-
-          ${
-            tagHtml
-              ? `<div style="margin-top:7px;">${tagHtml}</div>`
-              : ''
-          }
-
-        </div>
-
-      </div>
-
-    `;
-
-  }).join('');
+    }).join('');
 
 }
 
@@ -1435,17 +1808,24 @@ function renderHistory() {
 
 function renderStats() {
 
-  const stats = $('stats');
-  const insights = $('insights');
+  const stats =
+    $('stats');
 
-  const records = [...db.diary]
-    .filter(x => x.sleepDate)
-    .sort(
-      (a, b) =>
-        String(a.sleepDate).localeCompare(
-          String(b.sleepDate)
-        )
-    );
+  const insights =
+    $('insights');
+
+  const records =
+    [...db.diary]
+      .filter(
+        x => x.sleepDate
+      )
+      .sort(
+        (a, b) =>
+          String(a.sleepDate)
+            .localeCompare(
+              String(b.sleepDate)
+            )
+      );
 
 
   if (!records.length) {
@@ -1453,60 +1833,73 @@ function renderStats() {
     stats.innerHTML =
       '<p>まだ分析できる記録がありません。</p>';
 
-    insights.innerHTML = '';
+    insights.innerHTML =
+      '';
 
     return;
   }
 
 
-  /*
-    直近7日分
-  */
-
   const latestDate =
     new Date(
-      records[records.length - 1].sleepDate
+      records[
+        records.length - 1
+      ].sleepDate
     );
+
 
   const sevenDaysAgo =
     new Date(latestDate);
+
 
   sevenDaysAgo.setDate(
     sevenDaysAgo.getDate() - 6
   );
 
 
-  const recent = records.filter(item => {
+  const recent =
+    records.filter(item => {
 
-    const d = new Date(item.sleepDate);
+      const d =
+        new Date(item.sleepDate);
 
-    return d >= sevenDaysAgo &&
-           d <= latestDate;
+      return (
+        d >= sevenDaysAgo &&
+        d <= latestDate
+      );
 
-  });
+    });
 
 
   const sleepValues =
     recent
       .map(getSleepMinutes)
-      .filter(x => x !== null);
+      .filter(
+        x => x !== null
+      );
 
 
   const wakeSleepiness =
     average(
-      recent.map(x => x.wakeSleepiness)
+      recent.map(
+        x => x.wakeSleepiness
+      )
     );
 
 
   const laterSleepiness =
     average(
-      recent.map(x => x.laterSleepiness)
+      recent.map(
+        x => x.laterSleepiness
+      )
     );
 
 
   const nightSleepiness =
     average(
-      recent.map(x => x.nightSleepiness)
+      recent.map(
+        x => x.nightSleepiness
+      )
     );
 
 
@@ -1514,50 +1907,70 @@ function renderStats() {
     average(sleepValues);
 
 
-  /*
-    身体的負荷別
-  */
-
-  function averageForLoad(field, value) {
+  function averageForLoad(
+    field,
+    value
+  ) {
 
     return average(
       recent
-        .filter(x => x[field] === value)
-        .map(x => x.laterSleepiness)
+        .filter(
+          x => x[field] === value
+        )
+        .map(
+          x => x.laterSleepiness
+        )
     );
 
   }
 
 
   const physicalSmall =
-    averageForLoad('physicalLoad', '小');
+    averageForLoad(
+      'physicalLoad',
+      '小'
+    );
 
   const physicalMedium =
-    averageForLoad('physicalLoad', '中');
+    averageForLoad(
+      'physicalLoad',
+      '中'
+    );
 
   const physicalLarge =
-    averageForLoad('physicalLoad', '大');
+    averageForLoad(
+      'physicalLoad',
+      '大'
+    );
 
 
   const mentalSmall =
-    averageForLoad('mentalLoad', '小');
+    averageForLoad(
+      'mentalLoad',
+      '小'
+    );
 
   const mentalMedium =
-    averageForLoad('mentalLoad', '中');
+    averageForLoad(
+      'mentalLoad',
+      '中'
+    );
 
   const mentalLarge =
-    averageForLoad('mentalLoad', '大');
+    averageForLoad(
+      'mentalLoad',
+      '大'
+    );
 
-
-  /*
-    タグ集計
-  */
 
   const tagCount = {};
 
+
   recent.forEach(item => {
 
-    (item.tags || []).forEach(tag => {
+    (
+      item.tags || []
+    ).forEach(tag => {
 
       tagCount[tag] =
         (tagCount[tag] || 0) + 1;
@@ -1569,7 +1982,10 @@ function renderStats() {
 
   const tagSummary =
     Object.entries(tagCount)
-      .sort((a, b) => b[1] - a[1])
+      .sort(
+        (a, b) =>
+          b[1] - a[1]
+      )
       .map(
         ([tag, count]) =>
           `<span class="tag">${esc(tag)}：${count}日</span>`
@@ -1577,25 +1993,26 @@ function renderStats() {
       .join('');
 
 
-  /*
-    昼寝・飲酒・服薬
-  */
-
   const napDays =
     recent.filter(
-      x => x.napText && x.napText.trim()
+      x =>
+        x.napText &&
+        x.napText.trim()
     ).length;
 
 
   const alcoholDays =
     recent.filter(
-      x => x.alcohol === 'あり'
+      x =>
+        x.alcohol === 'あり'
     ).length;
 
 
   const medicationDays =
     recent.filter(
-      x => x.medTime && x.medTime.trim()
+      x =>
+        x.medTime &&
+        x.medTime.trim()
     ).length;
 
 
@@ -1682,7 +2099,7 @@ function renderStats() {
             ? '—'
             : physicalLarge.toFixed(1)
         }
-      </div>
+      </strong>
     </div>
 
     <div class="metric">
@@ -1693,7 +2110,7 @@ function renderStats() {
             ? '—'
             : mentalSmall.toFixed(1)
         }
-      </div>
+      </strong>
     </div>
 
     <div class="metric">
@@ -1704,7 +2121,7 @@ function renderStats() {
             ? '—'
             : mentalMedium.toFixed(1)
         }
-      </div>
+      </strong>
     </div>
 
     <div class="metric">
@@ -1715,21 +2132,24 @@ function renderStats() {
             ? '—'
             : mentalLarge.toFixed(1)
         }
-      </div>
+      </strong>
     </div>
 
     <h3>その他</h3>
 
     <div class="metric">
-      昼寝あり：<strong>${napDays}</strong>日
+      昼寝あり：
+      <strong>${napDays}</strong>日
     </div>
 
     <div class="metric">
-      飲酒あり：<strong>${alcoholDays}</strong>日
+      飲酒あり：
+      <strong>${alcoholDays}</strong>日
     </div>
 
     <div class="metric">
-      服薬時刻の記録あり：<strong>${medicationDays}</strong>日
+      服薬時刻の記録あり：
+      <strong>${medicationDays}</strong>日
     </div>
 
     <div class="metric">
@@ -1742,10 +2162,6 @@ function renderStats() {
   `;
 
 
-  /*
-    簡単な気づき
-  */
-
   const insightTexts = [];
 
 
@@ -1754,7 +2170,10 @@ function renderStats() {
     physicalSmall !== null
   ) {
 
-    if (physicalLarge > physicalSmall) {
+    if (
+      physicalLarge >
+      physicalSmall
+    ) {
 
       insightTexts.push(
         'この7日間では、身体的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
@@ -1776,7 +2195,10 @@ function renderStats() {
     mentalSmall !== null
   ) {
 
-    if (mentalLarge > mentalSmall) {
+    if (
+      mentalLarge >
+      mentalSmall
+    ) {
 
       insightTexts.push(
         'この7日間では、精神的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
@@ -1793,7 +2215,10 @@ function renderStats() {
   }
 
 
-  if (avgSleep !== null && laterSleepiness !== null) {
+  if (
+    avgSleep !== null &&
+    laterSleepiness !== null
+  ) {
 
     insightTexts.push(
       `平均睡眠時間は${formatDuration(avgSleep)}、起床後しばらくしてからの眠気は平均${laterSleepiness.toFixed(1)}/10です。`
@@ -1810,7 +2235,10 @@ function renderStats() {
   insights.innerHTML =
     '<h3>メモ</h3>' +
     insightTexts
-      .map(x => `<div class="insight">${esc(x)}</div>`)
+      .map(
+        x =>
+          `<div class="insight">${esc(x)}</div>`
+      )
       .join('');
 
 }
@@ -1823,6 +2251,7 @@ function renderStats() {
 function render() {
 
   renderHistory();
+
   renderStats();
 
 }
@@ -1832,38 +2261,355 @@ function render() {
    タブ
 ========================= */
 
-function activateTab(id, btnId) {
+function activateTab(
+  id,
+  btnId
+) {
 
-  const section = $(id);
+  const section =
+    $(id);
 
   if (!section) return;
 
 
   document
-    .querySelectorAll('main > section')
-    .forEach(x => {
-      x.classList.add('hidden');
-    });
+    .querySelectorAll(
+      'main > section'
+    )
+    .forEach(
+      x =>
+        x.classList.add(
+          'hidden'
+        )
+    );
 
 
-  section.classList.remove('hidden');
+  section.classList.remove(
+    'hidden'
+  );
 
 
   document
-    .querySelectorAll('.tab')
-    .forEach(x => {
-      x.classList.remove('active');
-    });
+    .querySelectorAll(
+      '.tab'
+    )
+    .forEach(
+      x =>
+        x.classList.remove(
+          'active'
+        )
+    );
 
 
-  const btn = $(btnId);
+  const btn =
+    $(btnId);
 
   if (btn) {
-    btn.classList.add('active');
+
+    btn.classList.add(
+      'active'
+    );
+
   }
 
 
   render();
+
+}
+
+
+/* =========================
+   バックアップ
+========================= */
+
+function backupData() {
+
+  const backup = {
+
+    app:
+      'Sleep Log',
+
+    schemaVersion:
+      SCHEMA_VERSION,
+
+    exportedAt:
+      new Date().toISOString(),
+
+    data:
+      db
+
+  };
+
+
+  const json =
+    JSON.stringify(
+      backup,
+      null,
+      2
+    );
+
+
+  const blob =
+    new Blob(
+      [json],
+      {
+        type:
+          'application/json'
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const date =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+
+  const filename =
+    `sleep-log-backup-${date}.json`;
+
+
+  /*
+    iPhoneなどで共有機能が使える場合
+  */
+
+  if (
+    navigator.share &&
+    navigator.canShare
+  ) {
+
+    const file =
+      new File(
+        [blob],
+        filename,
+        {
+          type:
+            'application/json'
+        }
+      );
+
+
+    if (
+      navigator.canShare({
+        files: [file]
+      })
+    ) {
+
+      navigator.share({
+        title:
+          'Sleep Log バックアップ',
+
+        text:
+          'Sleep Logのバックアップ',
+
+        files:
+          [file]
+
+      })
+      .then(
+        () => {
+          URL.revokeObjectURL(url);
+        }
+      )
+      .catch(
+        () => {
+          URL.revokeObjectURL(url);
+        }
+      );
+
+      return;
+    }
+
+  }
+
+
+  /*
+    共有機能が使えない場合
+  */
+
+  const a =
+    document.createElement(
+      'a'
+    );
+
+  a.href = url;
+
+  a.download =
+    filename;
+
+  document.body.appendChild(
+    a
+  );
+
+  a.click();
+
+  a.remove();
+
+  setTimeout(
+    () =>
+      URL.revokeObjectURL(url),
+    1000
+  );
+
+
+  alert(
+    'バックアップファイルを作成しました。'
+  );
+
+}
+
+
+/* =========================
+   バックアップ復元
+========================= */
+
+function restoreData(file) {
+
+  if (!file) return;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(event) {
+
+      try {
+
+        const backup =
+          JSON.parse(
+            event.target.result
+          );
+
+
+        /*
+          バックアップ形式確認
+        */
+
+        if (
+          !backup ||
+          backup.app !==
+            'Sleep Log' ||
+          !backup.data
+        ) {
+
+          alert(
+            'このファイルはSleep Logのバックアップとして認識できません。'
+          );
+
+          return;
+        }
+
+
+        const restored =
+          backup.data;
+
+
+        /*
+          配列がない場合も安全に補う
+        */
+
+        if (
+          !Array.isArray(
+            restored.diary
+          )
+        ) {
+          restored.diary = [];
+        }
+
+
+        if (
+          !Array.isArray(
+            restored.sleep
+          )
+        ) {
+          restored.sleep = [];
+        }
+
+
+        if (
+          !Array.isArray(
+            restored.morning
+          )
+        ) {
+          restored.morning = [];
+        }
+
+
+        if (
+          !Array.isArray(
+            restored.day
+          )
+        ) {
+          restored.day = [];
+        }
+
+
+        /*
+          復元前確認
+        */
+
+        const ok =
+          confirm(
+            `このバックアップを復元しますか？\n\n` +
+            `睡眠記録：${restored.diary.length}件\n\n` +
+            `現在のデータは上書きされます。`
+          );
+
+
+        if (!ok) {
+          return;
+        }
+
+
+        /*
+          現在のデータを自動退避
+        */
+
+        backupBeforeChange();
+
+
+        /*
+          復元
+        */
+
+        db =
+          restored;
+
+
+        saveDB();
+
+        resetForm();
+
+        render();
+
+
+        alert(
+          'バックアップから復元しました。'
+        );
+
+
+      } catch (error) {
+
+        alert(
+          'バックアップファイルを読み込めませんでした。'
+        );
+
+      }
+
+    };
+
+
+  reader.readAsText(
+    file
+  );
 
 }
 
@@ -1874,19 +2620,31 @@ function activateTab(id, btnId) {
 
 $('tabLog').addEventListener(
   'click',
-  () => activateTab('log', 'tabLog')
+  () =>
+    activateTab(
+      'log',
+      'tabLog'
+    )
 );
 
 
 $('tabHistory').addEventListener(
   'click',
-  () => activateTab('history', 'tabHistory')
+  () =>
+    activateTab(
+      'history',
+      'tabHistory'
+    )
 );
 
 
 $('tabAnalysis').addEventListener(
   'click',
-  () => activateTab('analysis', 'tabAnalysis')
+  () =>
+    activateTab(
+      'analysis',
+      'tabAnalysis'
+    )
 );
 
 
@@ -1902,22 +2660,73 @@ $('cancelEditBtn').addEventListener(
 );
 
 
+/* =========================
+   バックアップボタン
+========================= */
+
+$('backupBtn').addEventListener(
+  'click',
+  backupData
+);
+
+
+$('restoreBtn').addEventListener(
+  'click',
+  () => {
+
+    $('restoreFile').click();
+
+  }
+);
+
+
+$('restoreFile').addEventListener(
+  'change',
+  event => {
+
+    const file =
+      event.target.files[0];
+
+    restoreData(file);
+
+    /*
+      同じファイルをもう一度選べるようにする
+    */
+
+    event.target.value = '';
+
+  }
+);
+
+
+/* =========================
+   全データ削除
+========================= */
+
 $('clearAllBtn').addEventListener(
   'click',
   () => {
 
-    const ok = confirm(
-      'すべての睡眠記録を削除しますか？\n\nこの操作は元に戻せません。'
-    );
+    const ok =
+      confirm(
+        'すべての睡眠記録を削除しますか？\n\n' +
+        '削除前のデータは自動バックアップされます。'
+      );
+
 
     if (!ok) return;
 
-    db = {
-      sleep: [],
-      morning: [],
-      day: [],
-      diary: []
-    };
+
+    /*
+      削除前に自動バックアップ
+    */
+
+    backupBeforeChange();
+
+
+    db =
+      createEmptyDB();
+
 
     saveDB();
 
@@ -1938,7 +2747,10 @@ $('historyList').addEventListener(
   event => {
 
     const editButton =
-      event.target.closest('[data-edit-id]');
+      event.target.closest(
+        '[data-edit-id]'
+      );
+
 
     if (editButton) {
 
@@ -1947,11 +2759,15 @@ $('historyList').addEventListener(
       );
 
       return;
+
     }
 
 
     const deleteButton =
-      event.target.closest('[data-delete-id]');
+      event.target.closest(
+        '[data-delete-id]'
+      );
+
 
     if (deleteButton) {
 
