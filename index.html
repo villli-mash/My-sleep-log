@@ -1,246 +1,1977 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<title>Sleep Log v0.1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sleep Log v0.2</title>
+
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent2:#eef2ff;--danger:#dc2626}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
-header{background:#111827;color:#fff;padding:22px 18px 18px;position:sticky;top:0;z-index:5}
-h1{font-size:23px;margin:0 0 4px}.sub{font-size:12px;color:#cbd5e1}
-main{max-width:720px;margin:auto;padding:14px 14px 90px}.tabs{display:flex;gap:8px;margin-bottom:12px}
-.tab{flex:1;border:0;border-radius:12px;padding:11px;background:#e5e7eb;font-weight:700}.tab.active{background:#111827;color:#fff}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 2px 10px #00000008}
-h2{font-size:16px;margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px} input,select,textarea{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:11px;background:#fff;font-size:15px}
-textarea{min-height:75px;resize:vertical}.full{grid-column:1/-1}
-button.primary{width:100%;border:0;background:var(--accent);color:white;border-radius:12px;padding:13px;font-weight:800;font-size:15px;margin-top:10px}
-button.secondary{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.metric{font-size:26px;font-weight:800}.muted{color:var(--muted);font-size:12px}
-.bar{height:9px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:7px 0}.bar>i{display:block;height:100%;background:var(--accent)}
-.item{border-top:1px solid var(--line);padding:12px 0}.item:first-child{border-top:0}.pill{font-size:11px;background:var(--accent2);color:#3730a3;padding:4px 8px;border-radius:99px}
-.empty{text-align:center;color:var(--muted);padding:24px}.danger{color:var(--danger)}
-.hidden{display:none}.note{background:#f8fafc;padding:10px;border-radius:11px;font-size:12px;color:#475569}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    line-height: 1.6;
+  }
+
+  header {
+    background: white;
+    padding: 20px 16px 14px;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+  }
+
+  header p {
+    margin: 4px 0 0;
+    color: #666;
+    font-size: 13px;
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .tab {
+    flex: 1;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 10px 6px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .tab.active {
+    background: #222;
+    color: white;
+  }
+
+  section {
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .card h2 {
+    font-size: 17px;
+    margin: 0 0 12px;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .field small {
+    display: block;
+    color: #777;
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    padding: 10px;
+    font-size: 16px;
+    background: white;
+  }
+
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .three {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  button {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .primary {
+    width: 100%;
+    background: #222;
+    color: white;
+    margin-top: 8px;
+  }
+
+  .secondary {
+    background: #eee;
+    color: #222;
+  }
+
+  .danger {
+    background: #f3dddd;
+    color: #8b0000;
+  }
+
+  .editBtn {
+    background: #e9eef7;
+    color: #234;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .record {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 13px;
+    margin-bottom: 10px;
+    background: white;
+  }
+
+  .record-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .record-date {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .record-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .record-actions button {
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .record-body {
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .record-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .record-label {
+    color: #666;
+    min-width: 100px;
+  }
+
+  .tag {
+    display: inline-block;
+    background: #eee;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin: 2px;
+    font-size: 12px;
+  }
+
+  .metric {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #fafafa;
+  }
+
+  .metric strong {
+    font-size: 20px;
+  }
+
+  .insight {
+    border-left: 4px solid #999;
+    padding: 8px 10px;
+    margin: 8px 0;
+    background: #fafafa;
+    font-size: 13px;
+  }
+
+  .notice {
+    background: #fff8df;
+    border: 1px solid #eadca7;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .radio-option {
+    flex: 1;
+  }
+
+  .radio-option input {
+    display: none;
+  }
+
+  .radio-option label {
+    display: block;
+    text-align: center;
+    padding: 9px 5px;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    background: white;
+    cursor: pointer;
+    font-weight: normal;
+  }
+
+  .radio-option input:checked + label {
+    background: #222;
+    color: white;
+    border-color: #222;
+  }
+
+  @media (max-width: 500px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    .three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
 </style>
 </head>
+
 <body>
-<header><h1>Sleep Log</h1><div class="sub">睡眠記録 v0.1 — 「寝たのに眠い」も記録する</div></header>
+
+<header>
+  <h1>Sleep Log</h1>
+  <p>睡眠記録 v0.2 — 「寝たのに眠い」も記録する</p>
+</header>
+
 <main>
-<div class="tabs"><button id="tabLog" class="tab active" type="button">記録</button><button id="tabHistory" class="tab" type="button">履歴</button><button id="tabAnalysis" class="tab" type="button">分析</button></div>
 
-<section id="log">
-<div class="card">
-<h2>🌙 睡眠メモ</h2>
-<div class="grid">
-<div><label>記録日</label><input id="sleepDate" type="date"></div>
-<div><label>布団に入った時刻</label><input id="bedTime" type="time"></div>
-<div><label>実際に眠った時刻</label><input id="sleepTime" type="time"></div>
-<div><label>最終起床時刻</label><input id="finalWake" type="time"></div>
-<div><label>起きようとした時刻</label><input id="attemptWake" type="time"></div>
-<div><label>二度寝</label><input id="resleep" placeholder="例：6:00〜9:00 / なし"></div>
-<div><label>昼寝</label><input id="napText" placeholder="例：13:30〜17:30 / なし"></div>
-<div><label>光を浴びた時刻</label><input id="lightTime" type="time"></div>
-<div><label>カフェイン</label><input id="caffeineText" placeholder="例：13:00 コーヒー1杯"></div>
-<div><label>活動量</label><select id="activityLevel"><option>低</option><option selected>中</option><option>高</option><option>不明</option></select></div>
-<div><label>夜の眠気（0〜10）</label><input id="nightSleepiness" type="number" min="0" max="10" placeholder="任意"></div>
-<div><label>起床直後の眠気（0〜10）</label><input id="wakeSleepiness" type="number" min="0" max="10" value="5"></div>
-<div><label>起床直後 → 3.5時間後の眠気</label><input id="laterSleepiness" type="number" min="0" max="10" placeholder="任意"></div>
-<div><label>起き上がれるまで</label><input id="getUpTime" placeholder="例：0分 / 9:15"></div>
-<div><label>普通に活動できるまで</label><input id="normalTime" placeholder="例：0分 / 10:00"></div>
-<div><label>「起きよう」としてから普通に動けるまで</label><input id="wakeRecovery" placeholder="例：2時間30分"></div>
-<div class="full"><label>起床後の変化・きっかけ</label><textarea id="wakeNote" placeholder="例：職場からのメールが来ていないか確認したら一気に目が覚めた。"></textarea></div>
-<div class="full"><label>その他メモ</label><textarea id="sleepMemo" placeholder="その日の出来事、気分、体調、寝る前のことなど自由に。"></textarea></div>
-<div class="full"><label>その他メモ2</label><textarea id="sleepMemo2" placeholder="書き足したいことがあれば自由に。"></textarea></div>
-</div>
-<button class="primary" onclick="addSleepDiary()">この日の睡眠日誌を保存</button>
-</div>
+  <div class="tabs">
+    <button class="tab active" id="tabLog">記録</button>
+    <button class="tab" id="tabHistory">履歴</button>
+    <button class="tab" id="tabAnalysis">分析</button>
+  </div>
 
-<div class="card">
-<h2>🍺 飲酒</h2>
-<div class="grid">
-<div><label>飲酒</label><select id="alcohol"><option value="no">なし</option><option value="yes">あり</option></select></div>
-<div><label>酒の種類</label><input id="alcoholType" placeholder="例：ビール"></div>
-<div><label>量</label><input id="alcoholAmount" placeholder="例：1缶、350ml"></div>
-<div><label>度数</label><input id="alcoholAbv" placeholder="例：8%"></div>
-<div><label>飲酒開始</label><input id="alcoholStart" type="time"></div>
-<div><label>飲酒終了</label><input id="alcoholEnd" type="time"></div>
-</div>
-</div>
 
-<div class="card">
-<h2>🏷️ タグ</h2>
-<div style="display:flex;flex-wrap:wrap;gap:7px">
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="外出" style="width:auto;margin-right:4px">外出</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="運動" style="width:auto;margin-right:4px">運動</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="病院" style="width:auto;margin-right:4px">病院</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="ストレス" style="width:auto;margin-right:4px">ストレス</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="飲酒" style="width:auto;margin-right:4px">飲酒</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="カフェイン多め" style="width:auto;margin-right:4px">カフェイン多め</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="体調不良" style="width:auto;margin-right:4px">体調不良</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="長時間昼寝" style="width:auto;margin-right:4px">長時間昼寝</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="旅行" style="width:auto;margin-right:4px">旅行</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="仕事メール" style="width:auto;margin-right:4px">仕事メール</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="早朝外出の予定" style="width:auto;margin-right:4px">早朝外出の予定</label>
-<label style="background:#f1f5f9;padding:7px 10px;border-radius:99px;color:#334155"><input class="tag" type="checkbox" value="その他" style="width:auto;margin-right:4px">その他</label>
-</div>
-</div>
-<div class="note">このv0.2では、あなたが今使っている表をそのまま入力できることを優先。時刻が「不明」「だいたい」でもメモ欄で残せます。</div>
-</section>
+  <!-- =========================
+       記録
+  ========================== -->
 
-<section id="history" class="hidden">
-<div class="card"><div class="row"><h2>記録一覧</h2><button class="secondary" onclick="clearAll()">全削除</button></div><div id="historyList"></div></div>
-</section>
+  <section id="log">
 
-<section id="analysis" class="hidden">
-<div class="card"><h2>📊 最近7日</h2><div id="stats"></div></div>
-<div class="card"><h2>🔎 睡眠パターン</h2><div id="insights"></div></div>
-</section>
+    <div class="notice" id="editNotice" style="display:none;">
+      現在、過去の記録を編集しています。
+      修正後に「記録を更新」を押してください。
+    </div>
+
+    <div class="card">
+
+      <h2>睡眠</h2>
+
+      <div class="field">
+        <label for="sleepDate">記録日</label>
+        <input type="date" id="sleepDate">
+      </div>
+
+      <div class="row">
+
+        <div class="field">
+          <label for="bedTime">ベッドに入った時刻</label>
+          <input type="time" id="bedTime">
+        </div>
+
+        <div class="field">
+          <label for="sleepTime">眠りについた時刻</label>
+          <input type="time" id="sleepTime">
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div class="field">
+          <label for="finalWake">最終的に起きた時刻</label>
+          <input type="time" id="finalWake">
+        </div>
+
+        <div class="field">
+          <label for="attemptWake">最初に目が覚めた時刻</label>
+          <input type="time" id="attemptWake">
+        </div>
+
+      </div>
+
+      <div class="field">
+        <label for="resleep">二度寝・再入眠</label>
+        <input type="text" id="resleep"
+               placeholder="例：7:00〜9:00">
+      </div>
+
+      <div class="field">
+        <label for="napText">昼寝・日中の睡眠</label>
+        <input type="text" id="napText"
+               placeholder="例：14:00〜15:30">
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>眠気・起床後の状態</h2>
+
+      <div class="field">
+        <label for="nightSleepiness">夜の眠気</label>
+        <select id="nightSleepiness">
+          <option value="">選択</option>
+          <option value="0">0 — 眠くない</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 — 非常に眠い</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="wakeSleepiness">起床直後の眠気</label>
+        <select id="wakeSleepiness">
+          <option value="">選択</option>
+          <option value="0">0 — 眠くない</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 — 非常に眠い</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="laterSleepiness">起床後しばらくしてからの眠気</label>
+        <select id="laterSleepiness">
+          <option value="">選択</option>
+          <option value="0">0 — 眠くない</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10 — 非常に眠い</option>
+        </select>
+      </div>
+
+      <div class="row">
+
+        <div class="field">
+          <label for="getUpTime">ベッドから出た時刻</label>
+          <input type="time" id="getUpTime">
+        </div>
+
+        <div class="field">
+          <label for="normalTime">通常の活動に戻れた時刻</label>
+          <input type="time" id="normalTime">
+        </div>
+
+      </div>
+
+      <div class="field">
+        <label for="wakeRecovery">起床後の回復感</label>
+        <select id="wakeRecovery">
+          <option value="">選択</option>
+          <option value="かなり回復">かなり回復</option>
+          <option value="まあまあ回復">まあまあ回復</option>
+          <option value="普通">普通</option>
+          <option value="あまり回復していない">あまり回復していない</option>
+          <option value="全然回復していない">全然回復していない</option>
+        </select>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>光・カフェイン・活動</h2>
+
+      <div class="field">
+        <label for="lightTime">朝の光を浴びた時刻・時間</label>
+        <input type="text" id="lightTime"
+               placeholder="例：7:30、屋外20分">
+      </div>
+
+      <div class="field">
+        <label for="caffeineText">カフェイン</label>
+        <input type="text" id="caffeineText"
+               placeholder="例：コーヒー2杯、15時まで">
+      </div>
+
+      <div class="field">
+        <label for="activityLevel">活動量</label>
+        <select id="activityLevel">
+          <option value="">選択</option>
+          <option value="少ない">少ない</option>
+          <option value="普通">普通</option>
+          <option value="多い">多い</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>身体的負荷</label>
+
+        <div class="radio-group">
+
+          <div class="radio-option">
+            <input type="radio" name="physicalLoad"
+                   id="physicalSmall" value="小">
+            <label for="physicalSmall">小</label>
+          </div>
+
+          <div class="radio-option">
+            <input type="radio" name="physicalLoad"
+                   id="physicalMedium" value="中">
+            <label for="physicalMedium">中</label>
+          </div>
+
+          <div class="radio-option">
+            <input type="radio" name="physicalLoad"
+                   id="physicalLarge" value="大">
+            <label for="physicalLarge">大</label>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="field">
+        <label>精神的負荷</label>
+
+        <div class="radio-group">
+
+          <div class="radio-option">
+            <input type="radio" name="mentalLoad"
+                   id="mentalSmall" value="小">
+            <label for="mentalSmall">小</label>
+          </div>
+
+          <div class="radio-option">
+            <input type="radio" name="mentalLoad"
+                   id="mentalMedium" value="中">
+            <label for="mentalMedium">中</label>
+          </div>
+
+          <div class="radio-option">
+            <input type="radio" name="mentalLoad"
+                   id="mentalLarge" value="大">
+            <label for="mentalLarge">大</label>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>服薬・飲酒</h2>
+
+      <div class="field">
+        <label for="medTime">薬を飲んだ時刻</label>
+        <input type="time" id="medTime">
+      </div>
+
+      <div class="field">
+        <label for="alcohol">飲酒</label>
+        <select id="alcohol">
+          <option value="">選択</option>
+          <option value="なし">なし</option>
+          <option value="あり">あり</option>
+        </select>
+      </div>
+
+      <div class="row">
+
+        <div class="field">
+          <label for="alcoholType">種類</label>
+          <input type="text" id="alcoholType"
+                 placeholder="例：ビール">
+        </div>
+
+        <div class="field">
+          <label for="alcoholAmount">量</label>
+          <input type="text" id="alcoholAmount"
+                 placeholder="例：350ml">
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div class="field">
+          <label for="alcoholAbv">度数</label>
+          <input type="text" id="alcoholAbv"
+                 placeholder="例：5%">
+        </div>
+
+        <div class="field">
+          <label for="alcoholStart">飲酒開始</label>
+          <input type="time" id="alcoholStart">
+        </div>
+
+      </div>
+
+      <div class="field">
+        <label for="alcoholEnd">飲酒終了</label>
+        <input type="time" id="alcoholEnd">
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>その日の状態</h2>
+
+      <div class="field">
+        <label>タグ</label>
+
+        <div id="tagArea">
+
+          <label>
+            <input type="checkbox" name="tag" value="外出">
+            外出
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="運動">
+            運動
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="病院">
+            病院
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="ストレス">
+            ストレス
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="飲酒">
+            飲酒
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="カフェイン多め">
+            カフェイン多め
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="体調不良">
+            体調不良
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="長時間昼寝">
+            長時間昼寝
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="旅行">
+            旅行
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="仕事メール">
+            仕事メール
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="早朝外出の予定">
+            早朝外出の予定
+          </label>
+
+          <label>
+            <input type="checkbox" name="tag" value="その他">
+            その他
+          </label>
+
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="wakeNote">起床時メモ</label>
+        <textarea id="wakeNote"
+                  placeholder="起きたときの状態など"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="sleepMemo">睡眠メモ</label>
+        <textarea id="sleepMemo"
+                  placeholder="夜間の様子、途中覚醒など"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="sleepMemo2">その他メモ</label>
+        <textarea id="sleepMemo2"
+                  placeholder="自由記録"></textarea>
+      </div>
+
+    </div>
+
+
+    <button class="primary" id="saveDiaryBtn">
+      記録を保存
+    </button>
+
+    <button class="secondary"
+            id="cancelEditBtn"
+            style="display:none; width:100%; margin-top:8px;">
+      編集をキャンセル
+    </button>
+
+  </section>
+
+
+  <!-- =========================
+       履歴
+  ========================== -->
+
+  <section id="history" class="hidden">
+
+    <div class="card">
+
+      <h2>履歴</h2>
+
+      <button class="danger"
+              id="clearAllBtn"
+              style="width:100%;">
+        全データを削除
+      </button>
+
+    </div>
+
+    <div id="historyList"></div>
+
+  </section>
+
+
+  <!-- =========================
+       分析
+  ========================== -->
+
+  <section id="analysis" class="hidden">
+
+    <div class="card">
+
+      <h2>分析</h2>
+
+      <div id="stats"></div>
+
+      <div id="insights"></div>
+
+    </div>
+
+  </section>
+
 </main>
+
+
 <script>
-const KEY='sleepLogV01';
-let db=JSON.parse(localStorage.getItem(KEY)||'{"sleep":[],"morning":[],"day":[],"diary":[]}');
-const $=id=>document.getElementById(id);
-function save(){localStorage.setItem(KEY,JSON.stringify(db));render();}
-function isoLocal(d=new Date()){let z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
-function showTab(id,btn){
-  const section=$(id);
-  if(!section)return;
-  document.querySelectorAll('main>section').forEach(x=>x.classList.add('hidden'));
-  section.classList.remove('hidden');
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  render();
-}
-function addSleepDiary(){
-  const tags=[...document.querySelectorAll('.tag:checked')].map(x=>x.value);
-  const date=$('sleepDate').value || new Date().toISOString().slice(0,10);
-  const d={
-    id:Date.now(), date, type:'diary',
-    bed:$('bedTime').value, sleep:$('sleepTime').value, finalWake:$('finalWake').value,
-    attemptWake:$('attemptWake').value, resleep:$('resleep').value, nap:$('napText').value,
-    light:$('lightTime').value, caffeineText:$('caffeineText').value,
-    activityLevel:$('activityLevel').value, nightSleepiness:$('nightSleepiness').value,
-    wakeSleepiness:$('wakeSleepiness').value, laterSleepiness:$('laterSleepiness').value,
-    getUpTime:$('getUpTime').value, normalTime:$('normalTime').value, wakeRecovery:$('wakeRecovery').value,
-    wakeNote:$('wakeNote').value, memo:$('sleepMemo').value, memo2:$('sleepMemo2').value, tags,
-    alcohol: $('alcohol').value==='yes' ? {
-      type:$('alcoholType').value, amount:$('alcoholAmount').value, abv:$('alcoholAbv').value,
-      start:$('alcoholStart').value,end:$('alcoholEnd').value
-    } : null
-  };
-  db.diary=db.diary||[]; db.diary.push(d); save();
-  ['bedTime','sleepTime','finalWake','attemptWake','resleep','napText','lightTime','caffeineText','nightSleepiness','laterSleepiness','getUpTime','normalTime','wakeRecovery','wakeNote','sleepMemo','sleepMemo2','alcoholType','alcoholAmount','alcoholAbv','alcoholStart','alcoholEnd'].forEach(id=>$(id).value='');
-  document.querySelectorAll('.tag').forEach(x=>x.checked=false);
-}
-function addMorning(){db.morning.push({id:Date.now(),date:Date.now(),sleepiness:+$('sleepiness').value,fog:+$('fog').value,energy:+$('energy').value,mood:+$('mood').value,memo:$('memo').value});save();$('memo').value=''}
-function addDay(){
-  const tags=[...document.querySelectorAll('.tag:checked')].map(x=>x.value);
-  const drinking=$('alcohol').value==='yes';
-  db.day.push({
-    id:Date.now(),date:Date.now(),
-    caffeine:+$('caffeine').value,activity:+$('activity').value,outing:$('outing').value,
-    meds:$('meds').value, memo:$('dayMemo').value, tags,
-    alcohol:drinking ? {
-      type:$('alcoholType').value, ml:+$('alcoholMl').value||0,
-      start:$('alcoholStart').value,end:$('alcoholEnd').value,
-      intox:+$('alcoholIntox').value||0
-    } : null
-  });
-  save();
-  $('meds').value='';$('dayMemo').value='';$('alcoholMl').value='';$('alcoholStart').value='';$('alcoholEnd').value='';
-  document.querySelectorAll('.tag').forEach(x=>x.checked=false);
-}
-function fmtMin(m){let h=Math.floor(m/60),x=Math.round(m%60);return `${h}時間${x}分`}
-function render(){
- let diaries=(db.diary||[]).slice().sort((a,b)=>b.id-a.id);
- let legacy=[...db.sleep.map(x=>({...x,type:'睡眠'})),...db.morning.map(x=>({...x,type:'起床時'})),...db.day.map(x=>({...x,type:'生活'}))].sort((a,b)=>b.id-a.id);
- let list=[...diaries.map(x=>({diary:x,type:'日誌'})),...legacy];
- $('historyList').innerHTML=list.length?list.slice(0,50).map(item=>{
-   if(item.type==='日誌'){
-     let x=item.diary;
-     return `<div class=item>
-       <div class=row><b>🌙 ${esc(x.date)}</b><span class=pill>睡眠日誌</span></div>
-       <div class=muted>布団 ${x.bed||'—'} / 入眠 ${x.sleep||'—'} / 最終起床 ${x.finalWake||'—'}</div>
-       <div class=muted>起きようとした時刻 ${x.attemptWake||'—'} / 二度寝 ${esc(x.resleep||'なし')}</div>
-       <div class=muted>眠気：直後 ${x.wakeSleepiness||'—'} / 3.5h後 ${x.laterSleepiness||'—'} / 夜 ${x.nightSleepiness||'—'}</div>
-       <div class=muted>起き上がるまで ${esc(x.getUpTime||'—')} / 普通に活動 ${esc(x.normalTime||'—')}</div>
-       ${x.nap?`<div class=muted>昼寝：${esc(x.nap)}</div>`:''}
-       ${x.caffeineText?`<div class=muted>☕ ${esc(x.caffeineText)}</div>`:''}
-       ${x.light?`<div class=muted>☀️ 光：${x.light}</div>`:''}
-       ${x.activityLevel?`<div class=muted>活動量：${esc(x.activityLevel)}</div>`:''}
-       ${x.alcohol?`<div class=muted>🍺 ${esc(x.alcohol.type||'酒')} ${esc(x.alcohol.amount||'')} ${esc(x.alcohol.abv||'')} / ${x.alcohol.start||'—'}〜${x.alcohol.end||'—'}</div>`:''}
-       ${x.tags?.length?`<div style="margin-top:5px">${x.tags.map(t=>`<span class=pill style="margin-right:4px">${esc(t)}</span>`).join('')}</div>`:''}
-       ${x.wakeNote?`<div style="margin-top:7px"><b>起床後：</b>${esc(x.wakeNote)}</div>`:''}
-       ${x.memo?`<div style="margin-top:7px"><b>メモ：</b>${esc(x.memo)}</div>`:''}
-       ${x.memo2?`<div style="margin-top:5px"><b>メモ2：</b>${esc(x.memo2)}</div>`:''}
-     </div>`;
-   }
-   let x=item;
-   if(item.type==='睡眠')return `<div class=item><div class=row><b>${x.kind==='nap'?'💤 昼寝':'🌙 夜間睡眠'}</b><span class=pill>${fmtMin(x.mins)}</span></div><div class=muted>${new Date(x.s).toLocaleString('ja-JP')} → ${new Date(x.e).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})} / ${x.awake}</div></div>`;
-   if(item.type==='起床時')return `<div class=item><b>🧠 起床時</b><div class=muted>眠気 ${x.sleepiness}/10　頭の重さ ${x.fog}/10　体力 ${x.energy}/10　気分 ${x.mood}/10</div>${x.memo?`<div>${esc(x.memo)}</div>`:''}</div>`;
-   return `<div class=item><b>☕ 生活</b><div class=muted>カフェイン ${x.caffeine}杯 / 活動 ${x.activity}/10 / 外出 ${x.outing}${x.meds?' / 服薬：'+esc(x.meds):''}</div>${x.memo?`<div>${esc(x.memo)}</div>`:''}</div>`;
- }).join(''):'<div class=empty>まだ記録がありません。</div>';
- renderStats();
-}
-function renderStats(){
- let since=Date.now()-7*86400000,s=db.sleep.filter(x=>new Date(x.e).getTime()>=since);
- let night=s.filter(x=>x.kind==='night'),nap=s.filter(x=>x.kind==='nap');
- let total=s.reduce((a,x)=>a+x.mins,0), nt=night.reduce((a,x)=>a+x.mins,0), np=nap.reduce((a,x)=>a+x.mins,0);
- let m=db.morning.filter(x=>x.id>=since), avg=(arr,k)=>arr.length?(arr.reduce((a,x)=>a+x[k],0)/arr.length).toFixed(1):'—';
- $('stats').innerHTML=`<div class=grid>
- <div><div class=muted>総睡眠</div><div class=metric>${fmtMin(total)}</div></div>
- <div><div class=muted>夜間睡眠</div><div class=metric>${fmtMin(nt)}</div></div>
- <div><div class=muted>昼寝</div><div class=metric>${fmtMin(np)}</div></div>
- <div><div class=muted>記録日数</div><div class=metric>${m.length}</div></div>
- </div>
- <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
- <div>平均眠気 <b>${avg(m,'sleepiness')}/10</b><div class=bar><i style="width:${(+avg(m,'sleepiness')||0)*10}%"></i></div></div>
- <div>平均頭の重さ <b>${avg(m,'fog')}/10</b><div class=bar><i style="width:${(+avg(m,'fog')||0)*10}%"></i></div></div>
- <div>平均体力 <b>${avg(m,'energy')}/10</b><div class=bar><i style="width:${(+avg(m,'energy')||0)*10}%"></i></div></div>`;
- let insights=[];
- let recentDays=db.day.filter(x=>x.id>=since);
- let drinkDays=recentDays.filter(x=>x.alcohol);
- let tagCounts={}; recentDays.flatMap(x=>x.tags||[]).forEach(t=>tagCounts[t]=(tagCounts[t]||0)+1);
- if(np>180)insights.push(`最近7日で昼寝は合計 <b>${fmtMin(np)}</b>。夜間睡眠と分けて追跡できます。`);
- if(drinkDays.length)insights.push(`飲酒を記録した日は <b>${drinkDays.length}日</b>。今後、飲酒あり/なしで翌日の眠気を比較できるようにできます。`);
- let topTags=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,3);
- if(topTags.length)insights.push(`最近よく付いたタグ：${topTags.map(([t,n])=>`<b>${esc(t)}</b> ${n}回`).join('、')}`);
- if(total>7*12*60)insights.push('睡眠総量がかなり多い週です。記録の正確さを確認しつつ、眠気・体力との関係を見ていく設計です。');
- if(m.length>=2){let a=m.reduce((x,y)=>x+y.sleepiness,0)/m.length,e=m.reduce((x,y)=>x+y.energy,0)/m.length;if(a>=7&&e<=4)insights.push('「眠気が強い＋体力が低い」日が多め。睡眠時間だけでなく起床後の状態も記録する価値があります。')}
- if(!insights.length)insights.push('もう少し記録がたまると、睡眠時間と日中状態のパターンを見つけやすくなります。');
- $('insights').innerHTML=insights.map(x=>`<p>${x}</p>`).join('');
-}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function clearAll(){if(confirm('すべての記録を削除しますか？')){db={sleep:[],morning:[],day:[],diary:[]};save()}}
-if($('sleepDate') && !$('sleepDate').value) $('sleepDate').value=new Date().toISOString().slice(0,10);
-// タブはonclick属性に頼らず、JavaScriptから明示的に接続する
-function activateTab(id, btnId){
-  const section = $(id);
-  if(!section) return;
-  document.querySelectorAll('main>section').forEach(function(x){
-    x.classList.add('hidden');
-  });
-  section.classList.remove('hidden');
-  document.querySelectorAll('.tab').forEach(function(x){
-    x.classList.remove('active');
-  });
-  const btn = $(btnId);
-  if(btn) btn.classList.add('active');
-  render();
+
+const KEY = 'sleepLogV01';
+
+let db = JSON.parse(
+  localStorage.getItem(KEY) ||
+  '{"sleep":[],"morning":[],"day":[],"diary":[]}'
+);
+
+if (!db.sleep) db.sleep = [];
+if (!db.morning) db.morning = [];
+if (!db.day) db.day = [];
+if (!db.diary) db.diary = [];
+
+let editingId = null;
+
+
+const $ = id => document.getElementById(id);
+
+
+/* =========================
+   基本
+========================= */
+
+function saveDB() {
+  localStorage.setItem(KEY, JSON.stringify(db));
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-  const logBtn = $('tabLog');
-  const historyBtn = $('tabHistory');
-  const analysisBtn = $('tabAnalysis');
-  if(logBtn) logBtn.addEventListener('click', function(){ activateTab('log','tabLog'); });
-  if(historyBtn) historyBtn.addEventListener('click', function(){ activateTab('history','tabHistory'); });
-  if(analysisBtn) analysisBtn.addEventListener('click', function(){ activateTab('analysis','tabAnalysis'); });
-});
+
+function esc(value) {
+
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+function makeId() {
+  return Date.now().toString(36) +
+    Math.random().toString(36).slice(2);
+}
+
+
+/* =========================
+   今日の日付
+========================= */
+
+function todayString() {
+
+  const d = new Date();
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+
+  return `${y}-${m}-${day}`;
+}
+
+
+if (!$('sleepDate').value) {
+  $('sleepDate').value = todayString();
+}
+
+
+/* =========================
+   ラジオボタン
+========================= */
+
+function getRadio(name) {
+
+  const checked =
+    document.querySelector(`input[name="${name}"]:checked`);
+
+  return checked ? checked.value : '';
+}
+
+
+function setRadio(name, value) {
+
+  document.querySelectorAll(
+    `input[name="${name}"]`
+  ).forEach(input => {
+    input.checked = input.value === value;
+  });
+}
+
+
+/* =========================
+   タグ
+========================= */
+
+function getTags() {
+
+  return Array.from(
+    document.querySelectorAll('input[name="tag"]:checked')
+  ).map(x => x.value);
+}
+
+
+function setTags(tags) {
+
+  document.querySelectorAll(
+    'input[name="tag"]'
+  ).forEach(input => {
+
+    input.checked =
+      Array.isArray(tags) &&
+      tags.includes(input.value);
+
+  });
+}
+
+
+/* =========================
+   フォームのデータ取得
+========================= */
+
+function getFormData() {
+
+  return {
+
+    sleepDate: $('sleepDate').value,
+
+    bedTime: $('bedTime').value,
+    sleepTime: $('sleepTime').value,
+    finalWake: $('finalWake').value,
+    attemptWake: $('attemptWake').value,
+
+    resleep: $('resleep').value,
+    napText: $('napText').value,
+
+    lightTime: $('lightTime').value,
+    caffeineText: $('caffeineText').value,
+
+    activityLevel: $('activityLevel').value,
+
+    physicalLoad: getRadio('physicalLoad'),
+    mentalLoad: getRadio('mentalLoad'),
+
+    nightSleepiness: $('nightSleepiness').value,
+    wakeSleepiness: $('wakeSleepiness').value,
+    laterSleepiness: $('laterSleepiness').value,
+
+    getUpTime: $('getUpTime').value,
+    normalTime: $('normalTime').value,
+
+    wakeRecovery: $('wakeRecovery').value,
+
+    wakeNote: $('wakeNote').value,
+    sleepMemo: $('sleepMemo').value,
+    sleepMemo2: $('sleepMemo2').value,
+
+    medTime: $('medTime').value,
+
+    alcohol: $('alcohol').value,
+    alcoholType: $('alcoholType').value,
+    alcoholAmount: $('alcoholAmount').value,
+    alcoholAbv: $('alcoholAbv').value,
+    alcoholStart: $('alcoholStart').value,
+    alcoholEnd: $('alcoholEnd').value,
+
+    tags: getTags()
+
+  };
+
+}
+
+
+/* =========================
+   フォームへデータを入れる
+========================= */
+
+function fillForm(data) {
+
+  $('sleepDate').value = data.sleepDate || '';
+
+  $('bedTime').value = data.bedTime || '';
+  $('sleepTime').value = data.sleepTime || '';
+  $('finalWake').value = data.finalWake || '';
+  $('attemptWake').value = data.attemptWake || '';
+
+  $('resleep').value = data.resleep || '';
+  $('napText').value = data.napText || '';
+
+  $('lightTime').value = data.lightTime || '';
+  $('caffeineText').value = data.caffeineText || '';
+
+  $('activityLevel').value = data.activityLevel || '';
+
+  setRadio(
+    'physicalLoad',
+    data.physicalLoad || ''
+  );
+
+  setRadio(
+    'mentalLoad',
+    data.mentalLoad || ''
+  );
+
+  $('nightSleepiness').value =
+    data.nightSleepiness ?? '';
+
+  $('wakeSleepiness').value =
+    data.wakeSleepiness ?? '';
+
+  $('laterSleepiness').value =
+    data.laterSleepiness ?? '';
+
+  $('getUpTime').value =
+    data.getUpTime || '';
+
+  $('normalTime').value =
+    data.normalTime || '';
+
+  $('wakeRecovery').value =
+    data.wakeRecovery || '';
+
+  $('wakeNote').value =
+    data.wakeNote || '';
+
+  $('sleepMemo').value =
+    data.sleepMemo || '';
+
+  $('sleepMemo2').value =
+    data.sleepMemo2 || '';
+
+  $('medTime').value =
+    data.medTime || '';
+
+  $('alcohol').value =
+    data.alcohol || '';
+
+  $('alcoholType').value =
+    data.alcoholType || '';
+
+  $('alcoholAmount').value =
+    data.alcoholAmount || '';
+
+  $('alcoholAbv').value =
+    data.alcoholAbv || '';
+
+  $('alcoholStart').value =
+    data.alcoholStart || '';
+
+  $('alcoholEnd').value =
+    data.alcoholEnd || '';
+
+  setTags(data.tags || []);
+
+}
+
+
+/* =========================
+   フォームリセット
+========================= */
+
+function resetForm() {
+
+  editingId = null;
+
+  $('sleepDate').value = todayString();
+
+  [
+    'bedTime',
+    'sleepTime',
+    'finalWake',
+    'attemptWake',
+    'resleep',
+    'napText',
+    'lightTime',
+    'caffeineText',
+    'nightSleepiness',
+    'wakeSleepiness',
+    'laterSleepiness',
+    'getUpTime',
+    'normalTime',
+    'wakeNote',
+    'sleepMemo',
+    'sleepMemo2',
+    'medTime',
+    'alcoholType',
+    'alcoholAmount',
+    'alcoholAbv',
+    'alcoholStart',
+    'alcoholEnd'
+  ].forEach(id => {
+
+    if ($(id)) {
+      $(id).value = '';
+    }
+
+  });
+
+  $('activityLevel').value = '';
+  $('wakeRecovery').value = '';
+  $('alcohol').value = '';
+
+  setRadio('physicalLoad', '');
+  setRadio('mentalLoad', '');
+  setTags([]);
+
+  $('editNotice').style.display = 'none';
+
+  $('saveDiaryBtn').textContent =
+    '記録を保存';
+
+  $('cancelEditBtn').style.display =
+    'none';
+
+}
+
+
+/* =========================
+   保存 / 更新
+========================= */
+
+function addSleepDiary() {
+
+  const data = getFormData();
+
+  if (!data.sleepDate) {
+
+    alert('記録日を入力してください。');
+
+    return;
+  }
+
+
+  if (editingId) {
+
+    const index = db.diary.findIndex(
+      x => x.id === editingId
+    );
+
+    if (index !== -1) {
+
+      db.diary[index] = {
+        ...db.diary[index],
+        ...data,
+        id: editingId,
+        updatedAt: new Date().toISOString()
+      };
+
+    }
+
+    alert('記録を更新しました。');
+
+  } else {
+
+    db.diary.push({
+
+      ...data,
+
+      id: makeId(),
+
+      createdAt: new Date().toISOString()
+
+    });
+
+    alert('記録を保存しました。');
+
+  }
+
+
+  saveDB();
+
+  resetForm();
+
+  render();
+
+}
+
+
+/* =========================
+   編集
+========================= */
+
+function editDiary(id) {
+
+  const item = db.diary.find(
+    x => x.id === id
+  );
+
+  if (!item) {
+
+    alert('記録が見つかりません。');
+
+    return;
+  }
+
+  editingId = id;
+
+  fillForm(item);
+
+  $('editNotice').style.display = 'block';
+
+  $('saveDiaryBtn').textContent =
+    '記録を更新';
+
+  $('cancelEditBtn').style.display =
+    'block';
+
+  activateTab('log', 'tabLog');
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+}
+
+
+/* =========================
+   個別削除
+========================= */
+
+function deleteDiary(id) {
+
+  const item = db.diary.find(
+    x => x.id === id
+  );
+
+  if (!item) return;
+
+
+  const ok = confirm(
+    `${item.sleepDate || 'この記録'}を削除しますか？\n\nこの操作は元に戻せません。`
+  );
+
+  if (!ok) return;
+
+
+  db.diary = db.diary.filter(
+    x => x.id !== id
+  );
+
+  saveDB();
+
+  render();
+
+}
+
+
+/* =========================
+   時刻計算
+========================= */
+
+function timeToMinutes(value) {
+
+  if (!value || !/^\d{1,2}:\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const parts = value.split(':');
+
+  return Number(parts[0]) * 60 +
+         Number(parts[1]);
+
+}
+
+
+function durationMinutes(start, end) {
+
+  let s = timeToMinutes(start);
+  let e = timeToMinutes(end);
+
+  if (s === null || e === null) {
+    return null;
+  }
+
+  if (e < s) {
+    e += 24 * 60;
+  }
+
+  return e - s;
+}
+
+
+function formatDuration(minutes) {
+
+  if (minutes === null ||
+      minutes === undefined ||
+      isNaN(minutes)) {
+
+    return '—';
+  }
+
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+
+  if (h === 0) {
+    return `${m}分`;
+  }
+
+  return `${h}時間${m}分`;
+}
+
+
+/* =========================
+   睡眠時間
+========================= */
+
+function getSleepMinutes(item) {
+
+  return durationMinutes(
+    item.sleepTime,
+    item.finalWake
+  );
+
+}
+
+
+/* =========================
+   平均
+========================= */
+
+function average(values) {
+
+  const nums = values
+    .map(Number)
+    .filter(x => !isNaN(x));
+
+  if (!nums.length) {
+    return null;
+  }
+
+  return nums.reduce(
+    (a, b) => a + b,
+    0
+  ) / nums.length;
+
+}
+
+
+/* =========================
+   履歴表示
+========================= */
+
+function renderHistory() {
+
+  const list = $('historyList');
+
+  if (!db.diary.length) {
+
+    list.innerHTML =
+      '<div class="card">まだ記録がありません。</div>';
+
+    return;
+  }
+
+
+  const records = [...db.diary].sort(
+    (a, b) =>
+      String(b.sleepDate || '').localeCompare(
+        String(a.sleepDate || '')
+      )
+  );
+
+
+  list.innerHTML = records.map(item => {
+
+    const sleepMinutes =
+      getSleepMinutes(item);
+
+    const tags =
+      Array.isArray(item.tags)
+        ? item.tags
+        : [];
+
+    const tagHtml =
+      tags.map(tag =>
+        `<span class="tag">${esc(tag)}</span>`
+      ).join('');
+
+
+    return `
+
+      <div class="record">
+
+        <div class="record-header">
+
+          <div class="record-date">
+            ${esc(item.sleepDate || '日付なし')}
+          </div>
+
+          <div class="record-actions">
+
+            <button
+              class="editBtn"
+              data-edit-id="${esc(item.id)}">
+              編集
+            </button>
+
+            <button
+              class="danger"
+              data-delete-id="${esc(item.id)}">
+              削除
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="record-body">
+
+          <div class="record-row">
+            <span class="record-label">睡眠時間</span>
+            <span>${formatDuration(sleepMinutes)}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">就床</span>
+            <span>${esc(item.bedTime || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">入眠</span>
+            <span>${esc(item.sleepTime || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">最終起床</span>
+            <span>${esc(item.finalWake || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">起床時の眠気</span>
+            <span>${esc(item.wakeSleepiness || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">後の眠気</span>
+            <span>${esc(item.laterSleepiness || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">活動量</span>
+            <span>${esc(item.activityLevel || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">身体的負荷</span>
+            <span>${esc(item.physicalLoad || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">精神的負荷</span>
+            <span>${esc(item.mentalLoad || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">服薬時刻</span>
+            <span>${esc(item.medTime || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">昼寝</span>
+            <span>${esc(item.napText || '—')}</span>
+          </div>
+
+          ${
+            tagHtml
+              ? `<div style="margin-top:7px;">${tagHtml}</div>`
+              : ''
+          }
+
+        </div>
+
+      </div>
+
+    `;
+
+  }).join('');
+
+}
+
+
+/* =========================
+   分析
+========================= */
+
+function renderStats() {
+
+  const stats = $('stats');
+  const insights = $('insights');
+
+  const records = [...db.diary]
+    .filter(x => x.sleepDate)
+    .sort(
+      (a, b) =>
+        String(a.sleepDate).localeCompare(
+          String(b.sleepDate)
+        )
+    );
+
+
+  if (!records.length) {
+
+    stats.innerHTML =
+      '<p>まだ分析できる記録がありません。</p>';
+
+    insights.innerHTML = '';
+
+    return;
+  }
+
+
+  /*
+    直近7日分
+  */
+
+  const latestDate =
+    new Date(
+      records[records.length - 1].sleepDate
+    );
+
+  const sevenDaysAgo =
+    new Date(latestDate);
+
+  sevenDaysAgo.setDate(
+    sevenDaysAgo.getDate() - 6
+  );
+
+
+  const recent = records.filter(item => {
+
+    const d = new Date(item.sleepDate);
+
+    return d >= sevenDaysAgo &&
+           d <= latestDate;
+
+  });
+
+
+  const sleepValues =
+    recent
+      .map(getSleepMinutes)
+      .filter(x => x !== null);
+
+
+  const wakeSleepiness =
+    average(
+      recent.map(x => x.wakeSleepiness)
+    );
+
+
+  const laterSleepiness =
+    average(
+      recent.map(x => x.laterSleepiness)
+    );
+
+
+  const nightSleepiness =
+    average(
+      recent.map(x => x.nightSleepiness)
+    );
+
+
+  const avgSleep =
+    average(sleepValues);
+
+
+  /*
+    身体的負荷別
+  */
+
+  function averageForLoad(field, value) {
+
+    return average(
+      recent
+        .filter(x => x[field] === value)
+        .map(x => x.laterSleepiness)
+    );
+
+  }
+
+
+  const physicalSmall =
+    averageForLoad('physicalLoad', '小');
+
+  const physicalMedium =
+    averageForLoad('physicalLoad', '中');
+
+  const physicalLarge =
+    averageForLoad('physicalLoad', '大');
+
+
+  const mentalSmall =
+    averageForLoad('mentalLoad', '小');
+
+  const mentalMedium =
+    averageForLoad('mentalLoad', '中');
+
+  const mentalLarge =
+    averageForLoad('mentalLoad', '大');
+
+
+  /*
+    タグ集計
+  */
+
+  const tagCount = {};
+
+  recent.forEach(item => {
+
+    (item.tags || []).forEach(tag => {
+
+      tagCount[tag] =
+        (tagCount[tag] || 0) + 1;
+
+    });
+
+  });
+
+
+  const tagSummary =
+    Object.entries(tagCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(
+        ([tag, count]) =>
+          `<span class="tag">${esc(tag)}：${count}日</span>`
+      )
+      .join('');
+
+
+  /*
+    昼寝・飲酒・服薬
+  */
+
+  const napDays =
+    recent.filter(
+      x => x.napText && x.napText.trim()
+    ).length;
+
+
+  const alcoholDays =
+    recent.filter(
+      x => x.alcohol === 'あり'
+    ).length;
+
+
+  const medicationDays =
+    recent.filter(
+      x => x.medTime && x.medTime.trim()
+    ).length;
+
+
+  stats.innerHTML = `
+
+    <div class="metric">
+      <div>分析対象</div>
+      <strong>${recent.length}日</strong>
+      <div>直近7日間</div>
+    </div>
+
+    <div class="metric">
+      <div>平均睡眠時間</div>
+      <strong>
+        ${formatDuration(avgSleep)}
+      </strong>
+    </div>
+
+    <div class="metric">
+      <div>平均・起床直後の眠気</div>
+      <strong>
+        ${
+          wakeSleepiness === null
+            ? '—'
+            : wakeSleepiness.toFixed(1)
+        }
+      </strong>
+      <div>0〜10</div>
+    </div>
+
+    <div class="metric">
+      <div>平均・起床後しばらくしてからの眠気</div>
+      <strong>
+        ${
+          laterSleepiness === null
+            ? '—'
+            : laterSleepiness.toFixed(1)
+        }
+      </strong>
+      <div>0〜10</div>
+    </div>
+
+    <div class="metric">
+      <div>平均・夜の眠気</div>
+      <strong>
+        ${
+          nightSleepiness === null
+            ? '—'
+            : nightSleepiness.toFixed(1)
+        }
+      </strong>
+      <div>0〜10</div>
+    </div>
+
+    <h3>負荷と眠気</h3>
+
+    <div class="metric">
+      <div>身体的負荷「小」→ 後の眠気</div>
+      <strong>
+        ${
+          physicalSmall === null
+            ? '—'
+            : physicalSmall.toFixed(1)
+        }
+      </strong>
+    </div>
+
+    <div class="metric">
+      <div>身体的負荷「中」→ 後の眠気</div>
+      <strong>
+        ${
+          physicalMedium === null
+            ? '—'
+            : physicalMedium.toFixed(1)
+        }
+      </strong>
+    </div>
+
+    <div class="metric">
+      <div>身体的負荷「大」→ 後の眠気</div>
+      <strong>
+        ${
+          physicalLarge === null
+            ? '—'
+            : physicalLarge.toFixed(1)
+        }
+      </div>
+    </div>
+
+    <div class="metric">
+      <div>精神的負荷「小」→ 後の眠気</div>
+      <strong>
+        ${
+          mentalSmall === null
+            ? '—'
+            : mentalSmall.toFixed(1)
+        }
+      </div>
+    </div>
+
+    <div class="metric">
+      <div>精神的負荷「中」→ 後の眠気</div>
+      <strong>
+        ${
+          mentalMedium === null
+            ? '—'
+            : mentalMedium.toFixed(1)
+        }
+      </div>
+    </div>
+
+    <div class="metric">
+      <div>精神的負荷「大」→ 後の眠気</div>
+      <strong>
+        ${
+          mentalLarge === null
+            ? '—'
+            : mentalLarge.toFixed(1)
+        }
+      </div>
+    </div>
+
+    <h3>その他</h3>
+
+    <div class="metric">
+      昼寝あり：<strong>${napDays}</strong>日
+    </div>
+
+    <div class="metric">
+      飲酒あり：<strong>${alcoholDays}</strong>日
+    </div>
+
+    <div class="metric">
+      服薬時刻の記録あり：<strong>${medicationDays}</strong>日
+    </div>
+
+    <div class="metric">
+      <div>タグ</div>
+      <div style="margin-top:5px;">
+        ${tagSummary || 'まだありません'}
+      </div>
+    </div>
+
+  `;
+
+
+  /*
+    簡単な気づき
+  */
+
+  const insightTexts = [];
+
+
+  if (
+    physicalLarge !== null &&
+    physicalSmall !== null
+  ) {
+
+    if (physicalLarge > physicalSmall) {
+
+      insightTexts.push(
+        'この7日間では、身体的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
+      );
+
+    } else {
+
+      insightTexts.push(
+        'この7日間では、身体的負荷「大」の日の後の眠気が、負荷「小」の日より高いとは限りません。'
+      );
+
+    }
+
+  }
+
+
+  if (
+    mentalLarge !== null &&
+    mentalSmall !== null
+  ) {
+
+    if (mentalLarge > mentalSmall) {
+
+      insightTexts.push(
+        'この7日間では、精神的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
+      );
+
+    } else {
+
+      insightTexts.push(
+        'この7日間では、精神的負荷「大」の日の後の眠気が、負荷「小」の日より高いとは限りません。'
+      );
+
+    }
+
+  }
+
+
+  if (avgSleep !== null && laterSleepiness !== null) {
+
+    insightTexts.push(
+      `平均睡眠時間は${formatDuration(avgSleep)}、起床後しばらくしてからの眠気は平均${laterSleepiness.toFixed(1)}/10です。`
+    );
+
+  }
+
+
+  insightTexts.push(
+    'ここで表示しているのは記録上の「傾向」です。日数が少ない段階では、原因や因果関係までは判断できません。'
+  );
+
+
+  insights.innerHTML =
+    '<h3>メモ</h3>' +
+    insightTexts
+      .map(x => `<div class="insight">${esc(x)}</div>`)
+      .join('');
+
+}
+
+
+/* =========================
+   全体レンダー
+========================= */
+
+function render() {
+
+  renderHistory();
+  renderStats();
+
+}
+
+
+/* =========================
+   タブ
+========================= */
+
+function activateTab(id, btnId) {
+
+  const section = $(id);
+
+  if (!section) return;
+
+
+  document
+    .querySelectorAll('main > section')
+    .forEach(x => {
+      x.classList.add('hidden');
+    });
+
+
+  section.classList.remove('hidden');
+
+
+  document
+    .querySelectorAll('.tab')
+    .forEach(x => {
+      x.classList.remove('active');
+    });
+
+
+  const btn = $(btnId);
+
+  if (btn) {
+    btn.classList.add('active');
+  }
+
+
+  render();
+
+}
+
+
+/* =========================
+   イベント
+========================= */
+
+$('tabLog').addEventListener(
+  'click',
+  () => activateTab('log', 'tabLog')
+);
+
+
+$('tabHistory').addEventListener(
+  'click',
+  () => activateTab('history', 'tabHistory')
+);
+
+
+$('tabAnalysis').addEventListener(
+  'click',
+  () => activateTab('analysis', 'tabAnalysis')
+);
+
+
+$('saveDiaryBtn').addEventListener(
+  'click',
+  addSleepDiary
+);
+
+
+$('cancelEditBtn').addEventListener(
+  'click',
+  resetForm
+);
+
+
+$('clearAllBtn').addEventListener(
+  'click',
+  () => {
+
+    const ok = confirm(
+      'すべての睡眠記録を削除しますか？\n\nこの操作は元に戻せません。'
+    );
+
+    if (!ok) return;
+
+    db = {
+      sleep: [],
+      morning: [],
+      day: [],
+      diary: []
+    };
+
+    saveDB();
+
+    resetForm();
+
+    render();
+
+  }
+);
+
+
+/* =========================
+   履歴の編集・削除
+========================= */
+
+$('historyList').addEventListener(
+  'click',
+  event => {
+
+    const editButton =
+      event.target.closest('[data-edit-id]');
+
+    if (editButton) {
+
+      editDiary(
+        editButton.dataset.editId
+      );
+
+      return;
+    }
+
+
+    const deleteButton =
+      event.target.closest('[data-delete-id]');
+
+    if (deleteButton) {
+
+      deleteDiary(
+        deleteButton.dataset.deleteId
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================
+   初期化
+========================= */
 
 render();
+
 </script>
-</body></html>
+
+</body>
+</html>
