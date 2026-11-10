@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sleep Log v0.4</title>
+<title>Sleep Log v0.5</title>
 
 <style>
   * {
@@ -304,6 +304,143 @@
     font-size: 12px;
   }
 
+  /* ===== v0.5 追加 ===== */
+
+  .periodBar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .periodBtn {
+    flex: 1;
+    min-width: 70px;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 9px 4px;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .periodBtn.active {
+    background: #222;
+    color: white;
+    border-color: #222;
+  }
+
+  .delta {
+    font-size: 13px;
+    margin-left: 8px;
+  }
+
+  .delta.up { color: #b03030; }
+  .delta.down { color: #2e7d32; }
+  .delta.flat { color: #777; }
+  .delta.neutral { color: #555; }
+
+  .chartBox {
+    margin: 10px 0 4px;
+  }
+
+  .chartTitle {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 110px;
+    border-bottom: 1px solid #ccc;
+    padding-top: 4px;
+    overflow-x: auto;
+  }
+
+  .barWrap {
+    flex: 1 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+    min-width: 8px;
+  }
+
+  .bar {
+    background: #7fa6c9;
+    border-radius: 3px 3px 0 0;
+    width: 100%;
+  }
+
+  .bar.sleepy {
+    background: #d9a05b;
+  }
+
+  .bar.empty {
+    background: #e3e3e3;
+  }
+
+  .barLabels {
+    display: flex;
+    gap: 2px;
+    font-size: 9px;
+    color: #888;
+    overflow-x: auto;
+  }
+
+  .barLabels span {
+    flex: 1 0 8px;
+    min-width: 8px;
+    text-align: center;
+    writing-mode: vertical-rl;
+    height: 34px;
+  }
+
+  .cmpTable {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+  }
+
+  .cmpTable td {
+    padding: 6px 4px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cmpTable td.num {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .distRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .distLabel {
+    min-width: 74px;
+    color: #555;
+  }
+
+  .distBarOuter {
+    flex: 1;
+    background: #eee;
+    border-radius: 6px;
+    height: 12px;
+    overflow: hidden;
+  }
+
+  .distBarInner {
+    background: #7fa6c9;
+    height: 100%;
+  }
+
   @media (max-width: 500px) {
     .row {
       grid-template-columns: 1fr;
@@ -330,7 +467,7 @@
 
 <header>
   <h1>Sleep Log</h1>
-  <p>睡眠記録 v0.4 — 「寝たのに眠い」も記録する</p>
+  <p>睡眠記録 v0.5 — 「寝たのに眠い」も記録する／分析は期間を選べます</p>
 </header>
 
 <main>
@@ -468,7 +605,6 @@
         <select id="nightSleepiness">
 
           <option value="">選択</option>
-
           <option value="0">0 — 眠くない</option>
           <option value="1">1</option>
           <option value="2">2</option>
@@ -491,7 +627,6 @@
         <select id="wakeSleepiness">
 
           <option value="">選択</option>
-
           <option value="0">0 — 眠くない</option>
           <option value="1">1</option>
           <option value="2">2</option>
@@ -516,7 +651,6 @@
         <select id="laterSleepiness">
 
           <option value="">選択</option>
-
           <option value="0">0 — 眠くない</option>
           <option value="1">1</option>
           <option value="2">2</option>
@@ -559,26 +693,11 @@
         <select id="wakeRecovery">
 
           <option value="">選択</option>
-
-          <option value="かなり回復">
-            かなり回復
-          </option>
-
-          <option value="まあまあ回復">
-            まあまあ回復
-          </option>
-
-          <option value="普通">
-            普通
-          </option>
-
-          <option value="あまり回復していない">
-            あまり回復していない
-          </option>
-
-          <option value="全然回復していない">
-            全然回復していない
-          </option>
+          <option value="かなり回復">かなり回復</option>
+          <option value="まあまあ回復">まあまあ回復</option>
+          <option value="普通">普通</option>
+          <option value="あまり回復していない">あまり回復していない</option>
+          <option value="全然回復していない">全然回復していない</option>
 
         </select>
 
@@ -628,18 +747,9 @@
         <select id="activityLevel">
 
           <option value="">選択</option>
-
-          <option value="少ない">
-            少ない
-          </option>
-
-          <option value="普通">
-            普通
-          </option>
-
-          <option value="多い">
-            多い
-          </option>
+          <option value="少ない">少ない</option>
+          <option value="普通">普通</option>
+          <option value="多い">多い</option>
 
         </select>
 
@@ -653,41 +763,18 @@
         <div class="radio-group">
 
           <div class="radio-option">
-            <input
-              type="radio"
-              name="physicalLoad"
-              id="physicalSmall"
-              value="小">
-
-            <label for="physicalSmall">
-              小
-            </label>
+            <input type="radio" name="physicalLoad" id="physicalSmall" value="小">
+            <label for="physicalSmall">小</label>
           </div>
 
-
           <div class="radio-option">
-            <input
-              type="radio"
-              name="physicalLoad"
-              id="physicalMedium"
-              value="中">
-
-            <label for="physicalMedium">
-              中
-            </label>
+            <input type="radio" name="physicalLoad" id="physicalMedium" value="中">
+            <label for="physicalMedium">中</label>
           </div>
 
-
           <div class="radio-option">
-            <input
-              type="radio"
-              name="physicalLoad"
-              id="physicalLarge"
-              value="大">
-
-            <label for="physicalLarge">
-              大
-            </label>
+            <input type="radio" name="physicalLoad" id="physicalLarge" value="大">
+            <label for="physicalLarge">大</label>
           </div>
 
         </div>
@@ -702,47 +789,18 @@
         <div class="radio-group">
 
           <div class="radio-option">
-
-            <input
-              type="radio"
-              name="mentalLoad"
-              id="mentalSmall"
-              value="小">
-
-            <label for="mentalSmall">
-              小
-            </label>
-
+            <input type="radio" name="mentalLoad" id="mentalSmall" value="小">
+            <label for="mentalSmall">小</label>
           </div>
 
-
           <div class="radio-option">
-
-            <input
-              type="radio"
-              name="mentalLoad"
-              id="mentalMedium"
-              value="中">
-
-            <label for="mentalMedium">
-              中
-            </label>
-
+            <input type="radio" name="mentalLoad" id="mentalMedium" value="中">
+            <label for="mentalMedium">中</label>
           </div>
 
-
           <div class="radio-option">
-
-            <input
-              type="radio"
-              name="mentalLoad"
-              id="mentalLarge"
-              value="大">
-
-            <label for="mentalLarge">
-              大
-            </label>
-
+            <input type="radio" name="mentalLoad" id="mentalLarge" value="大">
+            <label for="mentalLarge">大</label>
           </div>
 
         </div>
@@ -762,9 +820,7 @@
           薬を飲んだ時刻
         </label>
 
-        <input
-          type="time"
-          id="medTime">
+        <input type="time" id="medTime">
 
       </div>
 
@@ -778,14 +834,8 @@
         <select id="alcohol">
 
           <option value="">選択</option>
-
-          <option value="なし">
-            なし
-          </option>
-
-          <option value="あり">
-            あり
-          </option>
+          <option value="なし">なし</option>
+          <option value="あり">あり</option>
 
         </select>
 
@@ -800,10 +850,7 @@
             種類
           </label>
 
-          <input
-            type="text"
-            id="alcoholType"
-            placeholder="例：ビール">
+          <input type="text" id="alcoholType" placeholder="例：ビール">
 
         </div>
 
@@ -814,10 +861,7 @@
             量
           </label>
 
-          <input
-            type="text"
-            id="alcoholAmount"
-            placeholder="例：350ml">
+          <input type="text" id="alcoholAmount" placeholder="例：350ml">
 
         </div>
 
@@ -832,10 +876,7 @@
             度数
           </label>
 
-          <input
-            type="text"
-            id="alcoholAbv"
-            placeholder="例：5%">
+          <input type="text" id="alcoholAbv" placeholder="例：5%">
 
         </div>
 
@@ -846,9 +887,7 @@
             飲酒開始
           </label>
 
-          <input
-            type="time"
-            id="alcoholStart">
+          <input type="time" id="alcoholStart">
 
         </div>
 
@@ -861,9 +900,7 @@
           飲酒終了
         </label>
 
-        <input
-          type="time"
-          id="alcoholEnd">
+        <input type="time" id="alcoholEnd">
 
       </div>
 
@@ -880,101 +917,18 @@
 
         <div id="tagArea">
 
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="外出">
-            外出
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="運動">
-            運動
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="病院">
-            病院
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="ストレス">
-            ストレス
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="飲酒">
-            飲酒
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="カフェイン多め">
-            カフェイン多め
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="体調不良">
-            体調不良
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="長時間昼寝">
-            長時間昼寝
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="旅行">
-            旅行
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="仕事メール">
-            仕事メール
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="早朝外出の予定">
-            早朝外出の予定
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              name="tag"
-              value="その他">
-            その他
-          </label>
+          <label><input type="checkbox" name="tag" value="外出"> 外出</label>
+          <label><input type="checkbox" name="tag" value="運動"> 運動</label>
+          <label><input type="checkbox" name="tag" value="病院"> 病院</label>
+          <label><input type="checkbox" name="tag" value="ストレス"> ストレス</label>
+          <label><input type="checkbox" name="tag" value="飲酒"> 飲酒</label>
+          <label><input type="checkbox" name="tag" value="カフェイン多め"> カフェイン多め</label>
+          <label><input type="checkbox" name="tag" value="体調不良"> 体調不良</label>
+          <label><input type="checkbox" name="tag" value="長時間昼寝"> 長時間昼寝</label>
+          <label><input type="checkbox" name="tag" value="旅行"> 旅行</label>
+          <label><input type="checkbox" name="tag" value="仕事メール"> 仕事メール</label>
+          <label><input type="checkbox" name="tag" value="早朝外出の予定"> 早朝外出の予定</label>
+          <label><input type="checkbox" name="tag" value="その他"> その他</label>
 
         </div>
 
@@ -987,9 +941,7 @@
           起床時メモ
         </label>
 
-        <textarea
-          id="wakeNote"
-          placeholder="起きたときの状態など"></textarea>
+        <textarea id="wakeNote" placeholder="起きたときの状態など"></textarea>
 
       </div>
 
@@ -1000,9 +952,7 @@
           睡眠メモ
         </label>
 
-        <textarea
-          id="sleepMemo"
-          placeholder="夜間の様子、途中覚醒など"></textarea>
+        <textarea id="sleepMemo" placeholder="夜間の様子、途中覚醒など"></textarea>
 
       </div>
 
@@ -1013,31 +963,20 @@
           その他メモ
         </label>
 
-        <textarea
-          id="sleepMemo2"
-          placeholder="自由記録"></textarea>
+        <textarea id="sleepMemo2" placeholder="自由記録"></textarea>
 
       </div>
 
     </div>
 
 
-    <button
-      class="primary"
-      id="saveDiaryBtn">
-
+    <button class="primary" id="saveDiaryBtn">
       記録を保存
-
     </button>
 
 
-    <button
-      class="secondary"
-      id="cancelEditBtn"
-      style="display:none; width:100%; margin-top:8px;">
-
+    <button class="secondary" id="cancelEditBtn" style="display:none; width:100%; margin-top:8px;">
       編集をキャンセル
-
     </button>
 
   </section>
@@ -1047,9 +986,7 @@
        履歴
   ========================== -->
 
-  <section
-    id="history"
-    class="hidden">
+  <section id="history" class="hidden">
 
 
     <div class="card">
@@ -1058,9 +995,7 @@
 
       <div class="safeNotice">
 
-        <strong>
-          🔒 データを守る
-        </strong>
+        <strong>🔒 データを守る</strong>
 
         <br>
 
@@ -1085,65 +1020,47 @@
 
         現在の睡眠記録：
 
-        <strong id="recordCount">
-          0
-        </strong>
+        <strong id="recordCount">0</strong>
 
         件
 
       </div>
 
 
-      <button
-        class="secondary"
-        id="backupBtn"
-        style="width:100%;">
-
+      <button class="secondary" id="backupBtn" style="width:100%;">
         📦 データをバックアップ
-
       </button>
 
 
       <div style="height:8px;"></div>
 
 
-      <input
-        type="file"
-        id="restoreFile"
-        accept=".json,application/json"
-        style="display:none;">
+      <button class="secondary" id="csvBtn" style="width:100%;">
+        📊 CSVで書き出す（分析・共有用）
+      </button>
 
 
-      <button
-        class="secondary"
-        id="restoreBtn"
-        style="width:100%;">
+      <div style="height:8px;"></div>
 
+
+      <input type="file" id="restoreFile" accept=".json,application/json" style="display:none;">
+
+
+      <button class="secondary" id="restoreBtn" style="width:100%;">
         📥 バックアップから復元
-
       </button>
 
 
       <div style="height:8px;"></div>
 
 
-      <button
-        class="secondary"
-        id="restoreAutoBtn"
-        style="width:100%;">
-
+      <button class="secondary" id="restoreAutoBtn" style="width:100%;">
         ↩️ 直前の自動バックアップを復元
-
       </button>
 
 
-      <div
-        class="backupInfo"
-        id="autoBackupInfo">
-
-        直前の自動バックアップ：
-        まだありません
-
+      <div class="backupInfo" id="autoBackupInfo">
+        直前の自動バックアップ：まだありません
       </div>
 
 
@@ -1151,6 +1068,10 @@
 
         手動バックアップはJSONファイルとして保存されます。
         iPhoneでは「ファイル」など、ブラウザの外にも保存してください。
+
+        <br>
+
+        CSVはExcelやスプレッドシートで開けます。受診時に見せる資料づくりにも使えます。
 
       </div>
 
@@ -1161,13 +1082,8 @@
 
       <h2>履歴</h2>
 
-      <button
-        class="danger"
-        id="clearAllBtn"
-        style="width:100%;">
-
+      <button class="danger" id="clearAllBtn" style="width:100%;">
         全データを削除
-
       </button>
 
     </div>
@@ -1182,16 +1098,27 @@
        分析
   ========================== -->
 
-  <section
-    id="analysis"
-    class="hidden">
+  <section id="analysis" class="hidden">
 
 
     <div class="card">
 
       <h2>分析</h2>
 
+      <div class="periodBar" id="periodBar">
+        <button class="periodBtn" data-period="7">直近7日</button>
+        <button class="periodBtn" data-period="30">直近30日</button>
+        <button class="periodBtn" data-period="90">直近90日</button>
+        <button class="periodBtn active" data-period="all">全期間</button>
+      </div>
+
+      <div class="subtle" style="margin-bottom:10px;">
+        平均の横の「前期間比」は、同じ長さの1つ前の期間との差です（全期間では表示されません）。
+      </div>
+
       <div id="stats"></div>
+
+      <div id="charts"></div>
 
       <div id="insights"></div>
 
@@ -1204,57 +1131,34 @@
 
 <script>
 
-
 /* =========================================================
-   基本設定
+   基本設定（v0.4と同一。保存キーを変えると記録が読めなくなるため変更禁止）
 ========================================================= */
 
-const KEY =
-  'sleepLogV01';
-
-const AUTO_BACKUP_KEY =
-  'sleepLogV01_autoBackup';
-
-const CORRUPT_BACKUP_KEY =
-  'sleepLogV01_corruptBackup';
-
-const SCHEMA_VERSION =
-  2;
-
+const KEY = 'sleepLogV01';
+const AUTO_BACKUP_KEY = 'sleepLogV01_autoBackup';
+const CORRUPT_BACKUP_KEY = 'sleepLogV01_corruptBackup';
+const SCHEMA_VERSION = 2;
 
 let db;
-
 let editingId = null;
+let analysisPeriod = 'all'; // '7' | '30' | '90' | 'all'
 
-
-const $ =
-  id =>
-    document.getElementById(id);
-
+const $ = id => document.getElementById(id);
 
 /* =========================================================
    空のデータベース
 ========================================================= */
 
 function createEmptyDB() {
-
   return {
-
-    schemaVersion:
-      SCHEMA_VERSION,
-
+    schemaVersion: SCHEMA_VERSION,
     sleep: [],
-
     morning: [],
-
     day: [],
-
     diary: []
-
   };
-
 }
-
 
 /* =========================================================
    データを整える
@@ -1262,97 +1166,25 @@ function createEmptyDB() {
 
 function normalizeDB(data) {
 
-  if (
-    !data ||
-    typeof data !== 'object'
-  ) {
-
+  if (!data || typeof data !== 'object') {
     return createEmptyDB();
-
   }
 
+  if (!Array.isArray(data.sleep)) data.sleep = [];
+  if (!Array.isArray(data.morning)) data.morning = [];
+  if (!Array.isArray(data.day)) data.day = [];
+  if (!Array.isArray(data.diary)) data.diary = [];
 
-  /*
-    元のデータにあった項目は
-    なるべくそのまま残す。
-  */
+  data.schemaVersion = SCHEMA_VERSION;
 
-  if (
-    !Array.isArray(data.sleep)
-  ) {
-
-    data.sleep = [];
-
-  }
-
-
-  if (
-    !Array.isArray(data.morning)
-  ) {
-
-    data.morning = [];
-
-  }
-
-
-  if (
-    !Array.isArray(data.day)
-  ) {
-
-    data.day = [];
-
-  }
-
-
-  if (
-    !Array.isArray(data.diary)
-  ) {
-
-    data.diary = [];
-
-  }
-
-
-  data.schemaVersion =
-    SCHEMA_VERSION;
-
-
-  /*
-    過去データに必要な項目がなくても
-    そのまま扱えるようにする。
-  */
-
-  data.diary =
-    data.diary.map(item => {
-
-      if (
-        !item ||
-        typeof item !== 'object'
-      ) {
-
-        return item;
-
-      }
-
-
-      if (
-        !Array.isArray(item.tags)
-      ) {
-
-        item.tags = [];
-
-      }
-
-
-      return item;
-
-    });
-
+  data.diary = data.diary.map(item => {
+    if (!item || typeof item !== 'object') return item;
+    if (!Array.isArray(item.tags)) item.tags = [];
+    return item;
+  });
 
   return data;
-
 }
-
 
 /* =========================================================
    データ読み込み
@@ -1360,124 +1192,59 @@ function normalizeDB(data) {
 
 function loadDB() {
 
-  const raw =
-    localStorage.getItem(KEY);
+  const raw = localStorage.getItem(KEY);
 
-
-  if (!raw) {
-
-    return createEmptyDB();
-
-  }
-
+  if (!raw) return createEmptyDB();
 
   try {
-
-    const parsed =
-      JSON.parse(raw);
-
+    const parsed = JSON.parse(raw);
     return normalizeDB(parsed);
-
   } catch (error) {
 
-    /*
-      壊れたデータを発見した場合、
-      上書きせずに別キーへ退避する。
-    */
-
     try {
-
       localStorage.setItem(
         CORRUPT_BACKUP_KEY,
         JSON.stringify({
-
-          savedAt:
-            new Date().toISOString(),
-
-          rawData:
-            raw
-
+          savedAt: new Date().toISOString(),
+          rawData: raw
         })
       );
-
     } catch (backupError) {
-
-      console.warn(
-        '壊れたデータの退避にも失敗しました。',
-        backupError
-      );
-
+      console.warn('壊れたデータの退避にも失敗しました。', backupError);
     }
-
 
     alert(
       '保存されているデータを読み込めませんでした。\n\n' +
       '元データは可能な限り退避しています。'
     );
 
-
     return createEmptyDB();
-
   }
-
 }
 
-
-db =
-  loadDB();
-
+db = loadDB();
 
 /* =========================================================
    今日の日付
 ========================================================= */
 
 function todayString() {
-
-  const d =
-    new Date();
-
-
-  const y =
-    d.getFullYear();
-
-
-  const m =
-    String(
-      d.getMonth() + 1
-    ).padStart(2, '0');
-
-
-  const day =
-    String(
-      d.getDate()
-    ).padStart(2, '0');
-
-
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
-
 }
-
 
 /* =========================================================
    基本保存
 ========================================================= */
 
 function saveDB() {
-
-  db =
-    normalizeDB(db);
-
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(db)
-  );
-
-
+  db = normalizeDB(db);
+  localStorage.setItem(KEY, JSON.stringify(db));
   updateBackupInfo();
-
 }
-
 
 /* =========================================================
    変更前の自動バックアップ
@@ -1486,52 +1253,22 @@ function saveDB() {
 function backupBeforeChange() {
 
   try {
-
-    const current =
-      localStorage.getItem(KEY);
-
-
-    if (!current) {
-
-      return;
-
-    }
-
-
-    /*
-      現在の状態を変更前に保存する。
-      次回「自動バックアップを復元」で
-      この状態に戻せる。
-    */
+    const current = localStorage.getItem(KEY);
+    if (!current) return;
 
     localStorage.setItem(
       AUTO_BACKUP_KEY,
       JSON.stringify({
-
-        savedAt:
-          new Date().toISOString(),
-
-        data:
-          JSON.parse(current)
-
+        savedAt: new Date().toISOString(),
+        data: JSON.parse(current)
       })
     );
-
-
   } catch (error) {
-
-    console.warn(
-      '自動バックアップに失敗しました。',
-      error
-    );
-
+    console.warn('自動バックアップに失敗しました。', error);
   }
 
-
   updateBackupInfo();
-
 }
-
 
 /* =========================================================
    自動バックアップ情報表示
@@ -1539,119 +1276,50 @@ function backupBeforeChange() {
 
 function updateBackupInfo() {
 
-  const info =
-    $('autoBackupInfo');
-
-
+  const info = $('autoBackupInfo');
   if (!info) return;
 
-
-  const raw =
-    localStorage.getItem(
-      AUTO_BACKUP_KEY
-    );
-
+  const raw = localStorage.getItem(AUTO_BACKUP_KEY);
 
   if (!raw) {
-
-    info.textContent =
-      '直前の自動バックアップ：まだありません';
-
+    info.textContent = '直前の自動バックアップ：まだありません';
     return;
-
   }
-
 
   try {
-
-    const backup =
-      JSON.parse(raw);
-
-
-    const date =
-      new Date(
-        backup.savedAt
-      );
-
-
+    const backup = JSON.parse(raw);
+    const date = new Date(backup.savedAt);
     info.textContent =
-      '直前の自動バックアップ：' +
-      date.toLocaleString('ja-JP');
-
+      '直前の自動バックアップ：' + date.toLocaleString('ja-JP');
   } catch (error) {
-
-    info.textContent =
-      '直前の自動バックアップ：確認できません';
-
+    info.textContent = '直前の自動バックアップ：確認できません';
   }
-
 }
-
 
 /* =========================================================
    HTMLエスケープ
 ========================================================= */
 
 function esc(value) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return '';
-
-  }
-
-
+  if (value === null || value === undefined) return '';
   return String(value)
-
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-
-    .replace(
-      /</g,
-      '&lt;'
-    )
-
-    .replace(
-      />/g,
-      '&gt;'
-    )
-
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-
-    .replace(
-      /'/g,
-      '&#039;'
-    );
-
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
-
 
 /* =========================================================
    ID
 ========================================================= */
 
 function makeId() {
-
   return (
-
     Date.now().toString(36) +
-
-    Math.random()
-      .toString(36)
-      .slice(2)
-
+    Math.random().toString(36).slice(2)
   );
-
 }
-
 
 /* =========================================================
    時刻を分にする
@@ -1659,86 +1327,32 @@ function makeId() {
 
 function timeToMinutes(value) {
 
-  if (
-    !value ||
-    !/^\d{1,2}:\d{2}$/.test(value)
-  ) {
+  if (!value || !/^\d{1,2}:\d{2}$/.test(value)) return null;
 
-    return null;
+  const parts = value.split(':');
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
 
-  }
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
-
-  const parts =
-    value.split(':');
-
-
-  const hour =
-    Number(parts[0]);
-
-
-  const minute =
-    Number(parts[1]);
-
-
-  if (
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59
-  ) {
-
-    return null;
-
-  }
-
-
-  return (
-    hour * 60 +
-    minute
-  );
-
+  return hour * 60 + minute;
 }
-
 
 /* =========================================================
    時刻差
 ========================================================= */
 
-function durationMinutes(
-  start,
-  end
-) {
+function durationMinutes(start, end) {
 
-  let s =
-    timeToMinutes(start);
+  let s = timeToMinutes(start);
+  let e = timeToMinutes(end);
 
+  if (s === null || e === null) return null;
 
-  let e =
-    timeToMinutes(end);
-
-
-  if (
-    s === null ||
-    e === null
-  ) {
-
-    return null;
-
-  }
-
-
-  if (e < s) {
-
-    e += 24 * 60;
-
-  }
-
+  if (e < s) e += 24 * 60;
 
   return e - s;
-
 }
-
 
 /* =========================================================
    「7:00〜9:00」などを解析
@@ -1746,196 +1360,92 @@ function durationMinutes(
 
 function parseRangeText(text) {
 
-  if (
-    !text ||
-    !String(text).trim()
-  ) {
+  if (!text || !String(text).trim()) return null;
 
-    return null;
+  const normalized = String(text)
+    .trim()
+    .replace(/～/g, '〜')
+    .replace(/~+/g, '〜')
+    .replace(/−|ー|–|—/g, '-');
 
-  }
+  const match = normalized.match(
+    /(\d{1,2}:\d{2})\s*(?:〜|-|から)\s*(\d{1,2}:\d{2})/
+  );
 
+  if (!match) return null;
 
-  const normalized =
-    String(text)
-      .trim()
-      .replace(
-        /～/g,
-        '〜'
-      )
-      .replace(
-        /~+/g,
-        '〜'
-      )
-      .replace(
-        /−|ー|–|—/g,
-        '-'
-      );
+  const start = match[1];
+  const end = match[2];
+  const minutes = durationMinutes(start, end);
 
+  if (minutes === null || minutes <= 0) return null;
 
-  /*
-    7:00〜9:00
-    7:00-9:00
-    7:00 〜 9:00
-  */
-
-  const match =
-    normalized.match(
-      /(\d{1,2}:\d{2})\s*(?:〜|-|から)\s*(\d{1,2}:\d{2})/
-    );
-
-
-  if (!match) {
-
-    return null;
-
-  }
-
-
-  const start =
-    match[1];
-
-
-  const end =
-    match[2];
-
-
-  const minutes =
-    durationMinutes(
-      start,
-      end
-    );
-
-
-  if (
-    minutes === null ||
-    minutes <= 0
-  ) {
-
-    return null;
-
-  }
-
-
-  return {
-
-    start,
-    end,
-    minutes
-
-  };
-
+  return { start, end, minutes };
 }
-
 
 /* =========================================================
    二度寝時間
 ========================================================= */
 
 function getResleepMinutes(item) {
-
-  /*
-    新形式：
-    resleep = "7:00〜9:00"
-  */
-
-  const parsed =
-    parseRangeText(
-      item.resleep
-    );
-
-
-  if (parsed) {
-
-    return parsed.minutes;
-
-  }
-
-
-  /*
-    将来的に数値を保存した場合にも対応
-  */
-
-  if (
-    typeof item.resleepMinutes ===
-    'number'
-  ) {
-
-    return item.resleepMinutes;
-
-  }
-
-
+  const parsed = parseRangeText(item.resleep);
+  if (parsed) return parsed.minutes;
+  if (typeof item.resleepMinutes === 'number') return item.resleepMinutes;
   return null;
-
 }
-
 
 /* =========================================================
    昼寝時間
 ========================================================= */
 
 function getNapMinutes(item) {
-
-  const parsed =
-    parseRangeText(
-      item.napText
-    );
-
-
-  if (parsed) {
-
-    return parsed.minutes;
-
-  }
-
-
-  if (
-    typeof item.napMinutes ===
-    'number'
-  ) {
-
-    return item.napMinutes;
-
-  }
-
-
+  const parsed = parseRangeText(item.napText);
+  if (parsed) return parsed.minutes;
+  if (typeof item.napMinutes === 'number') return item.napMinutes;
   return null;
-
 }
 
-
 /* =========================================================
-   夜間睡眠
+   夜間睡眠（入眠 → 最初の覚醒。なければ最終起床）
 ========================================================= */
 
 function getNightSleepMinutes(item) {
-
-  /*
-    最初に目が覚めた時刻があれば、
-    そこまでを主睡眠として扱う。
-
-    例：
-    23:30 入眠
-    7:00 最初の覚醒
-    9:00 最終起床
-
-    → 夜間睡眠 = 7時間30分
-    → 二度寝 = 2時間
-  */
-
-  const wake =
-    item.attemptWake ||
-    item.finalWake;
-
-
-  return durationMinutes(
-    item.sleepTime,
-    wake
-  );
-
+  const wake = item.attemptWake || item.finalWake;
+  return durationMinutes(item.sleepTime, wake);
 }
 
+/* =========================================================
+   ベッドにいた時間（就床 → 最終起床）
+========================================================= */
+
+function getTimeInBedMinutes(item) {
+  return durationMinutes(item.bedTime, item.finalWake);
+}
+
+/* =========================================================
+   入眠潜時（ベッドに入ってから眠るまで）
+========================================================= */
+
+function getSleepLatencyMinutes(item) {
+  return durationMinutes(item.bedTime, item.sleepTime);
+}
+
+/* =========================================================
+   起床にかかった時間（最初の覚醒 → ベッドを出る）
+========================================================= */
+
+function getWakeToGetUpMinutes(item) {
+  const from = item.attemptWake || item.finalWake;
+  return durationMinutes(from, item.getUpTime);
+}
+
+/* =========================================================
+   通常活動に戻るまで（最終起床 → 通常活動）
+========================================================= */
+
+function getWakeToNormalMinutes(item) {
+  return durationMinutes(item.finalWake, item.normalTime);
+}
 
 /* =========================================================
    24時間総睡眠
@@ -1943,46 +1453,17 @@ function getNightSleepMinutes(item) {
 
 function getTotalSleepMinutes(item) {
 
-  const night =
-    getNightSleepMinutes(item);
+  const night = getNightSleepMinutes(item);
+  const resleep = getResleepMinutes(item);
+  const nap = getNapMinutes(item);
 
+  const values = [night, resleep, nap]
+    .filter(x => x !== null && !isNaN(x));
 
-  const resleep =
-    getResleepMinutes(item);
+  if (!values.length) return null;
 
-
-  const nap =
-    getNapMinutes(item);
-
-
-  const values =
-    [
-      night,
-      resleep,
-      nap
-    ]
-    .filter(
-      x =>
-        x !== null &&
-        !isNaN(x)
-    );
-
-
-  if (!values.length) {
-
-    return null;
-
-  }
-
-
-  return values.reduce(
-    (a, b) =>
-      a + b,
-    0
-  );
-
+  return values.reduce((a, b) => a + b, 0);
 }
-
 
 /* =========================================================
    表示用時間
@@ -1990,258 +1471,202 @@ function getTotalSleepMinutes(item) {
 
 function formatDuration(minutes) {
 
-  if (
-    minutes === null ||
-    minutes === undefined ||
-    isNaN(minutes)
-  ) {
-
+  if (minutes === null || minutes === undefined || isNaN(minutes)) {
     return '—';
-
   }
 
+  const sign = minutes < 0 ? '−' : '';
+  const abs = Math.abs(Math.round(minutes));
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
 
-  const h =
-    Math.floor(
-      minutes / 60
-    );
+  if (h === 0) return `${sign}${m}分`;
 
-
-  const m =
-    Math.round(
-      minutes % 60
-    );
-
-
-  if (h === 0) {
-
-    return `${m}分`;
-
-  }
-
-
-  return `${h}時間${m}分`;
-
+  return `${sign}${h}時間${String(m).padStart(2, '0')}分`;
 }
 
+/* 短い表示（差分用） */
+function formatDurationShort(minutes) {
+
+  if (minutes === null || minutes === undefined || isNaN(minutes)) {
+    return '—';
+  }
+
+  const sign = minutes > 0 ? '+' : (minutes < 0 ? '−' : '±');
+  const abs = Math.abs(Math.round(minutes));
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+
+  if (h === 0) return `${sign}${m}分`;
+  return `${sign}${h}時間${String(m).padStart(2, '0')}分`;
+}
 
 /* =========================================================
-   平均
+   統計ヘルパー（平均・中央値・標準偏差・最小最大）
 ========================================================= */
 
-function average(values) {
-
-  const nums =
-    values
-
-      .map(Number)
-
-      .filter(
-        x =>
-          !isNaN(x)
-      );
-
-
-  if (!nums.length) {
-
-    return null;
-
-  }
-
-
-  return nums.reduce(
-    (a, b) =>
-      a + b,
-    0
-  ) / nums.length;
-
+function numList(values) {
+  return values
+    .map(v => (v === '' || v === null || v === undefined ? NaN : Number(v)))
+    .filter(x => !isNaN(x));
 }
 
+function average(values) {
+  const nums = numList(values);
+  if (!nums.length) return null;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
+}
+
+function median(values) {
+  const nums = numList(values).sort((a, b) => a - b);
+  if (!nums.length) return null;
+  const mid = Math.floor(nums.length / 2);
+  return nums.length % 2
+    ? nums[mid]
+    : (nums[mid - 1] + nums[mid]) / 2;
+}
+
+function stdDev(values) {
+  const nums = numList(values);
+  if (nums.length < 2) return null;
+  const avg = nums.reduce((a, b) => a + b, 0) / nums.length;
+  const variance =
+    nums.reduce((a, b) => a + (b - avg) * (b - avg), 0) / nums.length;
+  return Math.sqrt(variance);
+}
+
+function minOf(values) {
+  const nums = numList(values);
+  return nums.length ? Math.min(...nums) : null;
+}
+
+function maxOf(values) {
+  const nums = numList(values);
+  return nums.length ? Math.max(...nums) : null;
+}
+
+/* =========================================================
+   時刻の平均（0時をまたいでも破綻しない円環平均）
+========================================================= */
+
+function averageClockTime(timeStrings) {
+
+  const mins = timeStrings
+    .map(timeToMinutes)
+    .filter(x => x !== null);
+
+  if (!mins.length) return null;
+
+  let sinSum = 0;
+  let cosSum = 0;
+
+  mins.forEach(m => {
+    const angle = (m / (24 * 60)) * Math.PI * 2;
+    sinSum += Math.sin(angle);
+    cosSum += Math.cos(angle);
+  });
+
+  let angle = Math.atan2(sinSum, cosSum);
+  if (angle < 0) angle += Math.PI * 2;
+
+  const result = Math.round((angle / (Math.PI * 2)) * 24 * 60) % (24 * 60);
+
+  const h = Math.floor(result / 60);
+  const m = result % 60;
+
+  return `${h}:${String(m).padStart(2, '0')}`;
+}
+
+/* =========================================================
+   日付ヘルパー
+========================================================= */
+
+function parseDateLocal(dateStr) {
+  // 'YYYY-MM-DD' をローカル日付として解釈
+  const parts = String(dateStr).split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return null;
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatDateShort(dateStr) {
+  const d = parseDateLocal(dateStr);
+  if (!d) return esc(dateStr || '');
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
 
 /* =========================================================
    ラジオ
 ========================================================= */
 
 function getRadio(name) {
-
-  const checked =
-    document.querySelector(
-      `input[name="${name}"]:checked`
-    );
-
-
-  return checked
-    ? checked.value
-    : '';
-
+  const checked = document.querySelector(`input[name="${name}"]:checked`);
+  return checked ? checked.value : '';
 }
 
-
-function setRadio(
-  name,
-  value
-) {
-
+function setRadio(name, value) {
   document
-    .querySelectorAll(
-      `input[name="${name}"]`
-    )
-    .forEach(
-      input => {
-
-        input.checked =
-          input.value === value;
-
-      }
-    );
-
+    .querySelectorAll(`input[name="${name}"]`)
+    .forEach(input => {
+      input.checked = input.value === value;
+    });
 }
-
 
 /* =========================================================
    タグ
 ========================================================= */
 
 function getTags() {
-
   return Array.from(
-
-    document.querySelectorAll(
-      'input[name="tag"]:checked'
-    )
-
-  ).map(
-    x =>
-      x.value
-  );
-
+    document.querySelectorAll('input[name="tag"]:checked')
+  ).map(x => x.value);
 }
-
 
 function setTags(tags) {
-
   document
-    .querySelectorAll(
-      'input[name="tag"]'
-    )
-    .forEach(
-      input => {
-
-        input.checked =
-          Array.isArray(tags) &&
-          tags.includes(
-            input.value
-          );
-
-      }
-    );
-
+    .querySelectorAll('input[name="tag"]')
+    .forEach(input => {
+      input.checked =
+        Array.isArray(tags) && tags.includes(input.value);
+    });
 }
-
 
 /* =========================================================
    フォームデータ取得
 ========================================================= */
 
 function getFormData() {
-
   return {
-
-    sleepDate:
-      $('sleepDate').value,
-
-    bedTime:
-      $('bedTime').value,
-
-    sleepTime:
-      $('sleepTime').value,
-
-    finalWake:
-      $('finalWake').value,
-
-    attemptWake:
-      $('attemptWake').value,
-
-    resleep:
-      $('resleep').value,
-
-    napText:
-      $('napText').value,
-
-    lightTime:
-      $('lightTime').value,
-
-    caffeineText:
-      $('caffeineText').value,
-
-    activityLevel:
-      $('activityLevel').value,
-
-    physicalLoad:
-      getRadio(
-        'physicalLoad'
-      ),
-
-    mentalLoad:
-      getRadio(
-        'mentalLoad'
-      ),
-
-    nightSleepiness:
-      $('nightSleepiness').value,
-
-    wakeSleepiness:
-      $('wakeSleepiness').value,
-
-    laterSleepiness:
-      $('laterSleepiness').value,
-
-    getUpTime:
-      $('getUpTime').value,
-
-    normalTime:
-      $('normalTime').value,
-
-    wakeRecovery:
-      $('wakeRecovery').value,
-
-    wakeNote:
-      $('wakeNote').value,
-
-    sleepMemo:
-      $('sleepMemo').value,
-
-    sleepMemo2:
-      $('sleepMemo2').value,
-
-    medTime:
-      $('medTime').value,
-
-    alcohol:
-      $('alcohol').value,
-
-    alcoholType:
-      $('alcoholType').value,
-
-    alcoholAmount:
-      $('alcoholAmount').value,
-
-    alcoholAbv:
-      $('alcoholAbv').value,
-
-    alcoholStart:
-      $('alcoholStart').value,
-
-    alcoholEnd:
-      $('alcoholEnd').value,
-
-    tags:
-      getTags()
-
+    sleepDate: $('sleepDate').value,
+    bedTime: $('bedTime').value,
+    sleepTime: $('sleepTime').value,
+    finalWake: $('finalWake').value,
+    attemptWake: $('attemptWake').value,
+    resleep: $('resleep').value,
+    napText: $('napText').value,
+    lightTime: $('lightTime').value,
+    caffeineText: $('caffeineText').value,
+    activityLevel: $('activityLevel').value,
+    physicalLoad: getRadio('physicalLoad'),
+    mentalLoad: getRadio('mentalLoad'),
+    nightSleepiness: $('nightSleepiness').value,
+    wakeSleepiness: $('wakeSleepiness').value,
+    laterSleepiness: $('laterSleepiness').value,
+    getUpTime: $('getUpTime').value,
+    normalTime: $('normalTime').value,
+    wakeRecovery: $('wakeRecovery').value,
+    wakeNote: $('wakeNote').value,
+    sleepMemo: $('sleepMemo').value,
+    sleepMemo2: $('sleepMemo2').value,
+    medTime: $('medTime').value,
+    alcohol: $('alcohol').value,
+    alcoholType: $('alcoholType').value,
+    alcoholAmount: $('alcoholAmount').value,
+    alcoholAbv: $('alcoholAbv').value,
+    alcoholStart: $('alcoholStart').value,
+    alcoholEnd: $('alcoholEnd').value,
+    tags: getTags()
   };
-
 }
-
 
 /* =========================================================
    フォームへデータを入れる
@@ -2249,131 +1674,41 @@ function getFormData() {
 
 function fillForm(data) {
 
-  $('sleepDate').value =
-    data.sleepDate || '';
+  $('sleepDate').value = data.sleepDate || '';
+  $('bedTime').value = data.bedTime || '';
+  $('sleepTime').value = data.sleepTime || '';
+  $('finalWake').value = data.finalWake || '';
+  $('attemptWake').value = data.attemptWake || '';
+  $('resleep').value = data.resleep || '';
+  $('napText').value = data.napText || '';
+  $('lightTime').value = data.lightTime || '';
+  $('caffeineText').value = data.caffeineText || '';
+  $('activityLevel').value = data.activityLevel || '';
 
+  setRadio('physicalLoad', data.physicalLoad || '');
+  setRadio('mentalLoad', data.mentalLoad || '');
 
-  $('bedTime').value =
-    data.bedTime || '';
+  $('nightSleepiness').value = data.nightSleepiness ?? '';
+  $('wakeSleepiness').value = data.wakeSleepiness ?? '';
+  $('laterSleepiness').value = data.laterSleepiness ?? '';
+  $('getUpTime').value = data.getUpTime || '';
+  $('normalTime').value = data.normalTime || '';
+  $('wakeRecovery').value = data.wakeRecovery || '';
+  $('wakeNote').value = data.wakeNote || '';
+  $('sleepMemo').value = data.sleepMemo || '';
+  $('sleepMemo2').value = data.sleepMemo2 || '';
+  $('medTime').value = data.medTime || '';
+  $('alcohol').value = data.alcohol || '';
+  $('alcoholType').value = data.alcoholType || '';
+  $('alcoholAmount').value = data.alcoholAmount || '';
+  $('alcoholAbv').value = data.alcoholAbv || '';
+  $('alcoholStart').value = data.alcoholStart || '';
+  $('alcoholEnd').value = data.alcoholEnd || '';
 
-
-  $('sleepTime').value =
-    data.sleepTime || '';
-
-
-  $('finalWake').value =
-    data.finalWake || '';
-
-
-  $('attemptWake').value =
-    data.attemptWake || '';
-
-
-  $('resleep').value =
-    data.resleep || '';
-
-
-  $('napText').value =
-    data.napText || '';
-
-
-  $('lightTime').value =
-    data.lightTime || '';
-
-
-  $('caffeineText').value =
-    data.caffeineText || '';
-
-
-  $('activityLevel').value =
-    data.activityLevel || '';
-
-
-  setRadio(
-    'physicalLoad',
-    data.physicalLoad || ''
-  );
-
-
-  setRadio(
-    'mentalLoad',
-    data.mentalLoad || ''
-  );
-
-
-  $('nightSleepiness').value =
-    data.nightSleepiness ?? '';
-
-
-  $('wakeSleepiness').value =
-    data.wakeSleepiness ?? '';
-
-
-  $('laterSleepiness').value =
-    data.laterSleepiness ?? '';
-
-
-  $('getUpTime').value =
-    data.getUpTime || '';
-
-
-  $('normalTime').value =
-    data.normalTime || '';
-
-
-  $('wakeRecovery').value =
-    data.wakeRecovery || '';
-
-
-  $('wakeNote').value =
-    data.wakeNote || '';
-
-
-  $('sleepMemo').value =
-    data.sleepMemo || '';
-
-
-  $('sleepMemo2').value =
-    data.sleepMemo2 || '';
-
-
-  $('medTime').value =
-    data.medTime || '';
-
-
-  $('alcohol').value =
-    data.alcohol || '';
-
-
-  $('alcoholType').value =
-    data.alcoholType || '';
-
-
-  $('alcoholAmount').value =
-    data.alcoholAmount || '';
-
-
-  $('alcoholAbv').value =
-    data.alcoholAbv || '';
-
-
-  $('alcoholStart').value =
-    data.alcoholStart || '';
-
-
-  $('alcoholEnd').value =
-    data.alcoholEnd || '';
-
-
-  setTags(
-    data.tags || []
-  );
-
+  setTags(data.tags || []);
 
   updateSleepPreview();
-
 }
-
 
 /* =========================================================
    フォームリセット
@@ -2381,117 +1716,35 @@ function fillForm(data) {
 
 function resetForm() {
 
-  editingId =
-    null;
+  editingId = null;
 
-
-  $('sleepDate').value =
-    todayString();
-
+  $('sleepDate').value = todayString();
 
   [
+    'bedTime', 'sleepTime', 'finalWake', 'attemptWake',
+    'resleep', 'napText', 'lightTime', 'caffeineText',
+    'nightSleepiness', 'wakeSleepiness', 'laterSleepiness',
+    'getUpTime', 'normalTime', 'wakeNote', 'sleepMemo',
+    'sleepMemo2', 'medTime', 'alcoholType', 'alcoholAmount',
+    'alcoholAbv', 'alcoholStart', 'alcoholEnd'
+  ].forEach(id => {
+    if ($(id)) $(id).value = '';
+  });
 
-    'bedTime',
+  $('activityLevel').value = '';
+  $('wakeRecovery').value = '';
+  $('alcohol').value = '';
 
-    'sleepTime',
-
-    'finalWake',
-
-    'attemptWake',
-
-    'resleep',
-
-    'napText',
-
-    'lightTime',
-
-    'caffeineText',
-
-    'nightSleepiness',
-
-    'wakeSleepiness',
-
-    'laterSleepiness',
-
-    'getUpTime',
-
-    'normalTime',
-
-    'wakeNote',
-
-    'sleepMemo',
-
-    'sleepMemo2',
-
-    'medTime',
-
-    'alcoholType',
-
-    'alcoholAmount',
-
-    'alcoholAbv',
-
-    'alcoholStart',
-
-    'alcoholEnd'
-
-  ].forEach(
-    id => {
-
-      if ($(id)) {
-
-        $(id).value =
-          '';
-
-      }
-
-    }
-  );
-
-
-  $('activityLevel').value =
-    '';
-
-
-  $('wakeRecovery').value =
-    '';
-
-
-  $('alcohol').value =
-    '';
-
-
-  setRadio(
-    'physicalLoad',
-    ''
-  );
-
-
-  setRadio(
-    'mentalLoad',
-    ''
-  );
-
-
+  setRadio('physicalLoad', '');
+  setRadio('mentalLoad', '');
   setTags([]);
 
-
-  $('editNotice').style.display =
-    'none';
-
-
-  $('saveDiaryBtn').textContent =
-    '記録を保存';
-
-
-  $('cancelEditBtn').style.display =
-    'none';
-
+  $('editNotice').style.display = 'none';
+  $('saveDiaryBtn').textContent = '記録を保存';
+  $('cancelEditBtn').style.display = 'none';
 
   updateSleepPreview();
-
 }
-
 
 /* =========================================================
    睡眠時間プレビュー
@@ -2499,43 +1752,18 @@ function resetForm() {
 
 function updateSleepPreview() {
 
-  const item =
-    getFormData();
+  const item = getFormData();
 
+  const night = getNightSleepMinutes(item);
+  const resleep = getResleepMinutes(item);
+  const nap = getNapMinutes(item);
+  const total = getTotalSleepMinutes(item);
 
-  const night =
-    getNightSleepMinutes(item);
-
-
-  const resleep =
-    getResleepMinutes(item);
-
-
-  const nap =
-    getNapMinutes(item);
-
-
-  const total =
-    getTotalSleepMinutes(item);
-
-
-  $('previewNightSleep').textContent =
-    formatDuration(night);
-
-
-  $('previewResleep').textContent =
-    formatDuration(resleep);
-
-
-  $('previewNap').textContent =
-    formatDuration(nap);
-
-
-  $('previewTotalSleep').textContent =
-    formatDuration(total);
-
+  $('previewNightSleep').textContent = formatDuration(night);
+  $('previewResleep').textContent = formatDuration(resleep);
+  $('previewNap').textContent = formatDuration(nap);
+  $('previewTotalSleep').textContent = formatDuration(total);
 }
-
 
 /* =========================================================
    保存・更新
@@ -2543,121 +1771,52 @@ function updateSleepPreview() {
 
 function addSleepDiary() {
 
-  const data =
-    getFormData();
-
+  const data = getFormData();
 
   if (!data.sleepDate) {
-
-    alert(
-      '記録日を入力してください。'
-    );
-
+    alert('記録日を入力してください。');
     return;
-
   }
 
-
-  /*
-    入力された二度寝・昼寝を
-    数値としても保存しておく。
-
-    後で入力形式を変更しても
-    分数データを残せる。
-  */
-
-  const resleepMinutes =
-    getResleepMinutes(data);
-
-
-  const napMinutes =
-    getNapMinutes(data);
-
-
-  /*
-    変更前バックアップ
-  */
+  const resleepMinutes = getResleepMinutes(data);
+  const napMinutes = getNapMinutes(data);
 
   backupBeforeChange();
 
-
   if (editingId) {
 
-    const index =
-      db.diary.findIndex(
-        x =>
-          x.id === editingId
-      );
-
+    const index = db.diary.findIndex(x => x.id === editingId);
 
     if (index !== -1) {
-
       db.diary[index] = {
-
         ...db.diary[index],
-
         ...data,
-
-        resleepMinutes:
-          resleepMinutes,
-
-        napMinutes:
-          napMinutes,
-
-        id:
-          editingId,
-
-        updatedAt:
-          new Date().toISOString()
-
+        resleepMinutes: resleepMinutes,
+        napMinutes: napMinutes,
+        id: editingId,
+        updatedAt: new Date().toISOString()
       };
-
     }
 
-
-    alert(
-      '記録を更新しました。'
-    );
-
+    alert('記録を更新しました。');
 
   } else {
 
     db.diary.push({
-
       ...data,
-
-      resleepMinutes:
-        resleepMinutes,
-
-      napMinutes:
-        napMinutes,
-
-      id:
-        makeId(),
-
-      createdAt:
-        new Date().toISOString()
-
+      resleepMinutes: resleepMinutes,
+      napMinutes: napMinutes,
+      id: makeId(),
+      createdAt: new Date().toISOString()
     });
 
-
-    alert(
-      '記録を保存しました。'
-    );
-
+    alert('記録を保存しました。');
   }
 
-
   saveDB();
-
-
   resetForm();
-
-
   render();
-
 }
-
 
 /* =========================================================
    編集
@@ -2665,60 +1824,25 @@ function addSleepDiary() {
 
 function editDiary(id) {
 
-  const item =
-    db.diary.find(
-      x =>
-        x.id === id
-    );
-
+  const item = db.diary.find(x => x.id === id);
 
   if (!item) {
-
-    alert(
-      '記録が見つかりません。'
-    );
-
+    alert('記録が見つかりません。');
     return;
-
   }
 
-
-  editingId =
-    id;
-
+  editingId = id;
 
   fillForm(item);
 
+  $('editNotice').style.display = 'block';
+  $('saveDiaryBtn').textContent = '記録を更新';
+  $('cancelEditBtn').style.display = 'block';
 
-  $('editNotice').style.display =
-    'block';
+  activateTab('log', 'tabLog');
 
-
-  $('saveDiaryBtn').textContent =
-    '記録を更新';
-
-
-  $('cancelEditBtn').style.display =
-    'block';
-
-
-  activateTab(
-    'log',
-    'tabLog'
-  );
-
-
-  window.scrollTo({
-
-    top: 0,
-
-    behavior:
-      'smooth'
-
-  });
-
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 
 /* =========================================================
    個別削除
@@ -2726,46 +1850,23 @@ function editDiary(id) {
 
 function deleteDiary(id) {
 
-  const item =
-    db.diary.find(
-      x =>
-        x.id === id
-    );
-
-
+  const item = db.diary.find(x => x.id === id);
   if (!item) return;
 
-
-  const ok =
-    confirm(
-
-      `${item.sleepDate || 'この記録'}を削除しますか？\n\n` +
-
-      `削除前のデータは自動バックアップされます。`
-
-    );
-
+  const ok = confirm(
+    `${item.sleepDate || 'この記録'}を削除しますか？\n\n` +
+    `削除前のデータは自動バックアップされます。`
+  );
 
   if (!ok) return;
 
-
   backupBeforeChange();
 
-
-  db.diary =
-    db.diary.filter(
-      x =>
-        x.id !== id
-    );
-
+  db.diary = db.diary.filter(x => x.id !== id);
 
   saveDB();
-
-
   render();
-
 }
-
 
 /* =========================================================
    履歴
@@ -2773,1122 +1874,878 @@ function deleteDiary(id) {
 
 function renderHistory() {
 
-  const list =
-    $('historyList');
+  const list = $('historyList');
 
-
-  $('recordCount').textContent =
-    db.diary.length;
-
+  $('recordCount').textContent = db.diary.length;
 
   if (!db.diary.length) {
-
     list.innerHTML =
       '<div class="card">まだ記録がありません。</div>';
-
     return;
-
   }
 
+  const records = [...db.diary].sort((a, b) =>
+    String(b.sleepDate || '').localeCompare(String(a.sleepDate || ''))
+  );
 
-  const records =
-    [...db.diary]
-      .sort(
-        (a, b) =>
+  list.innerHTML = records.map(item => {
 
-          String(
-            b.sleepDate || ''
-          )
-          .localeCompare(
-            String(
-              a.sleepDate || ''
-            )
-          )
+    const night = getNightSleepMinutes(item);
+    const resleep = getResleepMinutes(item);
+    const nap = getNapMinutes(item);
+    const total = getTotalSleepMinutes(item);
 
-      );
+    const tags = Array.isArray(item.tags) ? item.tags : [];
 
+    const tagHtml = tags
+      .map(tag => `<span class="tag">${esc(tag)}</span>`)
+      .join('');
 
-  list.innerHTML =
-    records.map(item => {
+    return `
 
+      <div class="record">
 
-      const night =
-        getNightSleepMinutes(item);
+        <div class="record-header">
 
-
-      const resleep =
-        getResleepMinutes(item);
-
-
-      const nap =
-        getNapMinutes(item);
-
-
-      const total =
-        getTotalSleepMinutes(item);
-
-
-      const tags =
-        Array.isArray(item.tags)
-          ? item.tags
-          : [];
-
-
-      const tagHtml =
-        tags
-
-          .map(
-            tag =>
-              `<span class="tag">${esc(tag)}</span>`
-          )
-
-          .join('');
-
-
-      return `
-
-        <div class="record">
-
-          <div class="record-header">
-
-            <div class="record-date">
-              ${esc(
-                item.sleepDate ||
-                '日付なし'
-              )}
-            </div>
-
-            <div class="record-actions">
-
-              <button
-                class="editBtn"
-                data-edit-id="${esc(item.id)}">
-                編集
-              </button>
-
-              <button
-                class="danger"
-                data-delete-id="${esc(item.id)}">
-                削除
-              </button>
-
-            </div>
-
+          <div class="record-date">
+            ${esc(item.sleepDate || '日付なし')}
           </div>
 
-
-          <div class="record-body">
-
-            <div class="record-row">
-
-              <span class="record-label">
-                夜間睡眠
-              </span>
-
-              <span>
-                ${formatDuration(night)}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                二度寝
-              </span>
-
-              <span>
-                ${formatDuration(resleep)}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                昼寝
-              </span>
-
-              <span>
-                ${formatDuration(nap)}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                24時間総睡眠
-              </span>
-
-              <strong>
-                ${formatDuration(total)}
-              </strong>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                就床
-              </span>
-
-              <span>
-                ${esc(
-                  item.bedTime || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                入眠
-              </span>
-
-              <span>
-                ${esc(
-                  item.sleepTime || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                最初の覚醒
-              </span>
-
-              <span>
-                ${esc(
-                  item.attemptWake || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                最終起床
-              </span>
-
-              <span>
-                ${esc(
-                  item.finalWake || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                起床時の眠気
-              </span>
-
-              <span>
-                ${esc(
-                  item.wakeSleepiness || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                後の眠気
-              </span>
-
-              <span>
-                ${esc(
-                  item.laterSleepiness || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                活動量
-              </span>
-
-              <span>
-                ${esc(
-                  item.activityLevel || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                身体的負荷
-              </span>
-
-              <span>
-                ${esc(
-                  item.physicalLoad || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                精神的負荷
-              </span>
-
-              <span>
-                ${esc(
-                  item.mentalLoad || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            <div class="record-row">
-
-              <span class="record-label">
-                服薬時刻
-              </span>
-
-              <span>
-                ${esc(
-                  item.medTime || '—'
-                )}
-              </span>
-
-            </div>
-
-
-            ${
-              tagHtml
-                ? `
-
-                  <div style="margin-top:7px;">
-                    ${tagHtml}
-                  </div>
-
-                `
-                : ''
-            }
-
+          <div class="record-actions">
+
+            <button class="editBtn" data-edit-id="${esc(item.id)}">
+              編集
+            </button>
+
+            <button class="danger" data-delete-id="${esc(item.id)}">
+              削除
+            </button>
 
           </div>
 
         </div>
 
-      `;
+        <div class="record-body">
 
-    }).join('');
+          <div class="record-row">
+            <span class="record-label">夜間睡眠</span>
+            <span>${formatDuration(night)}</span>
+          </div>
 
+          <div class="record-row">
+            <span class="record-label">二度寝</span>
+            <span>${formatDuration(resleep)}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">昼寝</span>
+            <span>${formatDuration(nap)}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">24時間総睡眠</span>
+            <strong>${formatDuration(total)}</strong>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">就床</span>
+            <span>${esc(item.bedTime || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">入眠</span>
+            <span>${esc(item.sleepTime || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">最初の覚醒</span>
+            <span>${esc(item.attemptWake || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">最終起床</span>
+            <span>${esc(item.finalWake || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">起床時の眠気</span>
+            <span>${esc(item.wakeSleepiness || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">後の眠気</span>
+            <span>${esc(item.laterSleepiness || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">活動量</span>
+            <span>${esc(item.activityLevel || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">身体的負荷</span>
+            <span>${esc(item.physicalLoad || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">精神的負荷</span>
+            <span>${esc(item.mentalLoad || '—')}</span>
+          </div>
+
+          <div class="record-row">
+            <span class="record-label">服薬時刻</span>
+            <span>${esc(item.medTime || '—')}</span>
+          </div>
+
+          ${tagHtml ? `<div style="margin-top:7px;">${tagHtml}</div>` : ''}
+
+        </div>
+
+      </div>
+
+    `;
+
+  }).join('');
 }
 
 
 /* =========================================================
-   分析
+   分析（v0.5：期間切替・前期間比較・条件別比較・グラフ）
 ========================================================= */
+
+function getSortedRecords() {
+  return [...db.diary]
+    .filter(x => x.sleepDate)
+    .sort((a, b) =>
+      String(a.sleepDate).localeCompare(String(b.sleepDate))
+    );
+}
+
+/* 期間内の記録と、その1つ前の同じ長さの期間の記録を返す */
+function getPeriodRecords(period) {
+
+  const records = getSortedRecords();
+
+  if (!records.length) {
+    return { current: [], previous: [], start: null, end: null };
+  }
+
+  const end = parseDateLocal(records[records.length - 1].sleepDate);
+
+  if (period === 'all') {
+    return {
+      current: records,
+      previous: [],
+      start: parseDateLocal(records[0].sleepDate),
+      end: end
+    };
+  }
+
+  const days = Number(period);
+
+  const start = new Date(end);
+  start.setDate(start.getDate() - (days - 1));
+
+  const prevEnd = new Date(start);
+  prevEnd.setDate(prevEnd.getDate() - 1);
+
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevStart.getDate() - (days - 1));
+
+  const inRange = (item, from, to) => {
+    const d = parseDateLocal(item.sleepDate);
+    return d && d >= from && d <= to;
+  };
+
+  return {
+    current: records.filter(x => inRange(x, start, end)),
+    previous: records.filter(x => inRange(x, prevStart, prevEnd)),
+    start: start,
+    end: end
+  };
+}
+
+const RECOVERY_SCORE = {
+  'かなり回復': 4,
+  'まあまあ回復': 3,
+  '普通': 2,
+  'あまり回復していない': 1,
+  '全然回復していない': 0
+};
+
+function getRecoveryScore(item) {
+  const v = RECOVERY_SCORE[item.wakeRecovery];
+  return v === undefined ? null : v;
+}
+
+/* 期間サマリーをまとめて計算する */
+function summarize(records) {
+
+  const s = { count: records.length };
+
+  const collect = getter => records.map(getter);
+
+  // 睡眠時間
+  s.night = collect(getNightSleepMinutes);
+  s.total = collect(getTotalSleepMinutes);
+  s.timeInBed = collect(getTimeInBedMinutes);
+  s.latency = collect(getSleepLatencyMinutes);
+  s.wakeToGetUp = collect(getWakeToGetUpMinutes);
+  s.wakeToNormal = collect(getWakeToNormalMinutes);
+
+  // 二度寝・昼寝：発生日の平均と、全日平均（なし＝0）
+  const resleepRaw = collect(getResleepMinutes);
+  const napRaw = collect(getNapMinutes);
+
+  s.resleepDays = resleepRaw.filter(x => x !== null && x > 0).length;
+  s.napDays = napRaw.filter(x => x !== null && x > 0).length;
+
+  s.resleepAvgOnDays = average(resleepRaw.filter(x => x !== null && x > 0));
+  s.napAvgOnDays = average(napRaw.filter(x => x !== null && x > 0));
+
+  s.resleepAvgAllDays = average(resleepRaw.map(x => (x === null ? 0 : x)));
+  s.napAvgAllDays = average(napRaw.map(x => (x === null ? 0 : x)));
+
+  // 眠気
+  s.nightSleepiness = collect(x => x.nightSleepiness);
+  s.wakeSleepiness = collect(x => x.wakeSleepiness);
+  s.laterSleepiness = collect(x => x.laterSleepiness);
+  s.recoveryScore = collect(getRecoveryScore);
+
+  // 時刻の平均
+  s.avgBedTime = averageClockTime(records.map(x => x.bedTime));
+  s.avgSleepTime = averageClockTime(records.map(x => x.sleepTime));
+  s.avgFinalWake = averageClockTime(records.map(x => x.finalWake));
+  s.avgGetUpTime = averageClockTime(records.map(x => x.getUpTime));
+
+  // 回復感の内訳
+  s.recoveryCounts = {};
+  records.forEach(x => {
+    if (x.wakeRecovery) {
+      s.recoveryCounts[x.wakeRecovery] =
+        (s.recoveryCounts[x.wakeRecovery] || 0) + 1;
+    }
+  });
+
+  // 短い睡眠の日数（総睡眠ベース）
+  const totals = numList(s.total);
+  s.under6 = totals.filter(x => x < 360).length;
+  s.under7 = totals.filter(x => x < 420).length;
+
+  // 飲酒・服薬
+  s.alcoholDays = records.filter(x => x.alcohol === 'あり').length;
+  s.medicationDays = records.filter(
+    x => x.medTime && String(x.medTime).trim()
+  ).length;
+
+  // タグ集計
+  s.tagCount = {};
+  records.forEach(item => {
+    (item.tags || []).forEach(tag => {
+      s.tagCount[tag] = (s.tagCount[tag] || 0) + 1;
+    });
+  });
+
+  return s;
+}
+
+/* 条件で2群に分けて、指標の平均を比べる */
+function compareGroups(records, predicate, getter) {
+
+  const a = records.filter(predicate);
+  const b = records.filter(x => !predicate(x));
+
+  return {
+    aCount: a.length,
+    bCount: b.length,
+    aAvg: average(a.map(getter)),
+    bAvg: average(b.map(getter)),
+    aN: numList(a.map(getter)).length,
+    bN: numList(b.map(getter)).length
+  };
+}
+
+function fmtScore(v) {
+  return v === null || v === undefined || isNaN(v)
+    ? '—'
+    : Number(v).toFixed(1);
+}
+
+function fmtCount(n) {
+  return n === null || n === undefined ? '—' : String(n);
+}
+
+/* 前期間との差を表示するHTML（kind: 'duration' | 'sleepiness' | 'score'） */
+function deltaHtml(curAvg, prevAvg, kind) {
+
+  if (
+    curAvg === null || prevAvg === null ||
+    curAvg === undefined || prevAvg === undefined ||
+    isNaN(curAvg) || isNaN(prevAvg)
+  ) {
+    return '';
+  }
+
+  const diff = curAvg - prevAvg;
+
+  if (Math.abs(diff) < 0.05) {
+    return '<span class="delta flat">前期間とほぼ同じ</span>';
+  }
+
+  let text;
+  let cls = 'neutral';
+
+  if (kind === 'duration') {
+    text = '前期間比 ' + formatDurationShort(diff);
+  } else {
+    const sign = diff > 0 ? '+' : '−';
+    text = `前期間比 ${sign}${Math.abs(diff).toFixed(1)}`;
+    if (kind === 'sleepiness') {
+      cls = diff > 0 ? 'up' : 'down'; // 眠気は増えると悪化
+    } else if (kind === 'score') {
+      cls = diff > 0 ? 'down' : 'up'; // 回復感スコアは増えると改善（downクラス=緑）
+    }
+  }
+
+  return `<span class="delta ${cls}">${text}</span>`;
+}
+
+function metricBlock(label, valueHtml, subText, delta) {
+  return `
+    <div class="metric">
+      <div>${label}</div>
+      <strong>${valueHtml}</strong>${delta || ''}
+      ${subText ? `<div class="subtle">${subText}</div>` : ''}
+    </div>
+  `;
+}
+
+function spreadText(values) {
+  const nums = numList(values);
+  if (!nums.length) return '';
+  const sd = stdDev(values);
+  const med = median(values);
+  let t = `中央値 ${formatDuration(med)}／最短 ${formatDuration(minOf(values))}〜最長 ${formatDuration(maxOf(values))}`;
+  if (sd !== null) t += `／ばらつき（標準偏差）${formatDuration(sd)}`;
+  t += `／${nums.length}日分`;
+  return t;
+}
 
 function renderStats() {
 
-  const stats =
-    $('stats');
+  const stats = $('stats');
+  const charts = $('charts');
+  const insights = $('insights');
 
+  const all = getSortedRecords();
 
-  const insights =
-    $('insights');
-
-
-  const records =
-    [...db.diary]
-
-      .filter(
-        x =>
-          x.sleepDate
-      )
-
-      .sort(
-        (a, b) =>
-          String(
-            a.sleepDate
-          )
-          .localeCompare(
-            String(
-              b.sleepDate
-            )
-          )
-      );
-
-
-  if (!records.length) {
-
-    stats.innerHTML =
-      '<p>まだ分析できる記録がありません。</p>';
-
-    insights.innerHTML =
-      '';
-
+  if (!all.length) {
+    stats.innerHTML = '<p>まだ分析できる記録がありません。</p>';
+    charts.innerHTML = '';
+    insights.innerHTML = '';
     return;
-
   }
 
+  const { current, previous, start, end } =
+    getPeriodRecords(analysisPeriod);
 
-  const latestDate =
-    new Date(
-      records[
-        records.length - 1
-      ].sleepDate
-    );
+  const cur = summarize(current);
+  const prev = previous.length ? summarize(previous) : null;
 
+  const hasPrev = !!prev && analysisPeriod !== 'all';
 
-  const sevenDaysAgo =
-    new Date(
-      latestDate
-    );
+  const periodLabel =
+    analysisPeriod === 'all'
+      ? `全期間（${formatDateShort(all[0].sleepDate)} 〜 ${formatDateShort(all[all.length - 1].sleepDate)}）`
+      : `直近${analysisPeriod}日間（${formatDateShort(current[0].sleepDate)} 〜 ${formatDateShort(current[current.length - 1].sleepDate)}）`;
 
+  let html = '';
 
-  sevenDaysAgo.setDate(
-    sevenDaysAgo.getDate() - 6
+  /* ===== 対象 ===== */
+  html += metricBlock(
+    '分析対象',
+    `${cur.count}日`,
+    periodLabel + (hasPrev ? `／前期間 ${prev.count}日と比較` : '')
   );
 
+  /* ===== 睡眠時間 ===== */
+  html += '<h3>睡眠時間</h3>';
 
-  const recent =
-    records.filter(
-      item => {
+  html += metricBlock(
+    '平均・夜間睡眠',
+    formatDuration(average(cur.night)),
+    spreadText(cur.night),
+    hasPrev ? deltaHtml(average(cur.night), average(prev.night), 'duration') : ''
+  );
 
-        const d =
-          new Date(
-            item.sleepDate
-          );
+  html += metricBlock(
+    '平均・24時間総睡眠',
+    formatDuration(average(cur.total)),
+    spreadText(cur.total),
+    hasPrev ? deltaHtml(average(cur.total), average(prev.total), 'duration') : ''
+  );
 
+  html += metricBlock(
+    '二度寝',
+    `${cur.resleepDays}日（${cur.count ? Math.round((cur.resleepDays / cur.count) * 100) : 0}%）`,
+    `発生日の平均 ${formatDuration(cur.resleepAvgOnDays)}／全日平均（なし=0） ${formatDuration(cur.resleepAvgAllDays)}`,
+    ''
+  );
 
-        return (
-          d >= sevenDaysAgo &&
-          d <= latestDate
-        );
+  html += metricBlock(
+    '昼寝',
+    `${cur.napDays}日（${cur.count ? Math.round((cur.napDays / cur.count) * 100) : 0}%）`,
+    `発生日の平均 ${formatDuration(cur.napAvgOnDays)}／全日平均（なし=0） ${formatDuration(cur.napAvgAllDays)}`,
+    ''
+  );
 
+  html += metricBlock(
+    '総睡眠が7時間未満の日',
+    `${cur.under7}日`,
+    `うち6時間未満は ${cur.under6}日（総睡眠が計算できた日のうち）`,
+    ''
+  );
+
+  /* ===== 眠気・回復感 ===== */
+  html += '<h3>眠気・回復感</h3>';
+
+  html += metricBlock(
+    '平均・起床直後の眠気',
+    fmtScore(average(cur.wakeSleepiness)),
+    `0〜10／${numList(cur.wakeSleepiness).length}日分`,
+    hasPrev ? deltaHtml(average(cur.wakeSleepiness), average(prev.wakeSleepiness), 'sleepiness') : ''
+  );
+
+  html += metricBlock(
+    '平均・起床後しばらくしてからの眠気',
+    fmtScore(average(cur.laterSleepiness)),
+    `0〜10／${numList(cur.laterSleepiness).length}日分`,
+    hasPrev ? deltaHtml(average(cur.laterSleepiness), average(prev.laterSleepiness), 'sleepiness') : ''
+  );
+
+  html += metricBlock(
+    '平均・夜の眠気',
+    fmtScore(average(cur.nightSleepiness)),
+    `0〜10／${numList(cur.nightSleepiness).length}日分`,
+    hasPrev ? deltaHtml(average(cur.nightSleepiness), average(prev.nightSleepiness), 'sleepiness') : ''
+  );
+
+  const recoveryOrder = [
+    'かなり回復', 'まあまあ回復', '普通',
+    'あまり回復していない', '全然回復していない'
+  ];
+
+  const recoveryText = recoveryOrder
+    .filter(k => cur.recoveryCounts[k])
+    .map(k => `${k}：${cur.recoveryCounts[k]}日`)
+    .join('／');
+
+  html += metricBlock(
+    '起床後の回復感（平均スコア）',
+    fmtScore(average(cur.recoveryScore)),
+    (recoveryText || '記録なし') + '（スコアは かなり回復=4 〜 全然=0）',
+    hasPrev ? deltaHtml(average(cur.recoveryScore), average(prev.recoveryScore), 'score') : ''
+  );
+
+  /* ===== 時刻とリズム ===== */
+  html += '<h3>時刻とリズム</h3>';
+
+  html += metricBlock('平均・就床時刻', esc(cur.avgBedTime || '—'), '', '');
+  html += metricBlock('平均・入眠時刻', esc(cur.avgSleepTime || '—'), '', '');
+  html += metricBlock('平均・最終起床時刻', esc(cur.avgFinalWake || '—'), '', '');
+  html += metricBlock('平均・ベッドを出た時刻', esc(cur.avgGetUpTime || '—'), '', '');
+
+  html += metricBlock(
+    '平均・入眠潜時（ベッド→入眠）',
+    formatDuration(average(cur.latency)),
+    `${numList(cur.latency).length}日分`,
+    hasPrev ? deltaHtml(average(cur.latency), average(prev.latency), 'duration') : ''
+  );
+
+  html += metricBlock(
+    '平均・ベッドにいた時間（就床→最終起床）',
+    formatDuration(average(cur.timeInBed)),
+    `${numList(cur.timeInBed).length}日分`,
+    ''
+  );
+
+  html += metricBlock(
+    '平均・覚醒からベッドを出るまで',
+    formatDuration(average(cur.wakeToGetUp)),
+    `${numList(cur.wakeToGetUp).length}日分`,
+    ''
+  );
+
+  html += metricBlock(
+    '平均・起床から通常活動に戻るまで',
+    formatDuration(average(cur.wakeToNormal)),
+    `${numList(cur.wakeToNormal).length}日分`,
+    ''
+  );
+
+  /* ===== 総睡眠の分布 ===== */
+  html += '<h3>総睡眠時間の分布</h3>';
+
+  const totals = numList(cur.total);
+  const buckets = [
+    ['6時間未満', totals.filter(x => x < 360).length],
+    ['6〜7時間', totals.filter(x => x >= 360 && x < 420).length],
+    ['7〜8時間', totals.filter(x => x >= 420 && x < 480).length],
+    ['8〜9時間', totals.filter(x => x >= 480 && x < 540).length],
+    ['9時間以上', totals.filter(x => x >= 540).length]
+  ];
+
+  const maxBucket = Math.max(1, ...buckets.map(b => b[1]));
+
+  html += buckets.map(([label, n]) => `
+    <div class="distRow">
+      <span class="distLabel">${label}</span>
+      <span class="distBarOuter">
+        <span class="distBarInner" style="display:block;width:${Math.round((n / maxBucket) * 100)}%"></span>
+      </span>
+      <span>${n}日</span>
+    </div>
+  `).join('');
+
+  /* ===== 条件別比較 ===== */
+  html += '<h3>条件別くらべ</h3>';
+  html += '<div class="subtle" style="margin-bottom:6px;">同じ期間の中で、条件のある日とない日の平均を比べています。日数が少ない比較は参考程度に見てください。</div>';
+
+  const hasTag = (item, tag) =>
+    Array.isArray(item.tags) && item.tags.includes(tag);
+
+  const isWeekend = item => {
+    const d = parseDateLocal(item.sleepDate);
+    if (!d) return false;
+    const w = d.getDay();
+    return w === 0 || w === 6;
+  };
+
+  const cmpRows = [];
+
+  function addCmp(label, cmp, formatter) {
+    if (cmp.aN === 0 || cmp.bN === 0) return;
+    cmpRows.push(`
+      <tr>
+        <td>${label}</td>
+        <td class="num">あり ${formatter(cmp.aAvg)}（${cmp.aN}日）</td>
+        <td class="num">なし ${formatter(cmp.bAvg)}（${cmp.bN}日）</td>
+      </tr>
+    `);
+  }
+
+  addCmp(
+    '飲酒の日 → 夜間睡眠',
+    compareGroups(current, x => x.alcohol === 'あり', getNightSleepMinutes),
+    formatDuration
+  );
+
+  addCmp(
+    '飲酒の日 → 起床直後の眠気',
+    compareGroups(current, x => x.alcohol === 'あり', x => x.wakeSleepiness),
+    fmtScore
+  );
+
+  addCmp(
+    '昼寝した日 → 後の眠気',
+    compareGroups(current, x => (getNapMinutes(x) || 0) > 0, x => x.laterSleepiness),
+    fmtScore
+  );
+
+  addCmp(
+    '二度寝した日 → 後の眠気',
+    compareGroups(current, x => (getResleepMinutes(x) || 0) > 0, x => x.laterSleepiness),
+    fmtScore
+  );
+
+  addCmp(
+    '二度寝した日 → 回復感スコア',
+    compareGroups(current, x => (getResleepMinutes(x) || 0) > 0, getRecoveryScore),
+    fmtScore
+  );
+
+  addCmp(
+    'タグ「運動」の日 → 夜間睡眠',
+    compareGroups(current, x => hasTag(x, '運動'), getNightSleepMinutes),
+    formatDuration
+  );
+
+  addCmp(
+    'タグ「カフェイン多め」の日 → 入眠潜時',
+    compareGroups(current, x => hasTag(x, 'カフェイン多め'), getSleepLatencyMinutes),
+    formatDuration
+  );
+
+  // 平日・週末（ラベルが逆になるので専用行）
+  const weekendCmp = compareGroups(
+    current, isWeekend, getTotalSleepMinutes
+  );
+  if (weekendCmp.aN > 0 && weekendCmp.bN > 0) {
+    cmpRows.push(`
+      <tr>
+        <td>総睡眠（週末 vs 平日）</td>
+        <td class="num">週末 ${formatDuration(weekendCmp.aAvg)}（${weekendCmp.aN}日）</td>
+        <td class="num">平日 ${formatDuration(weekendCmp.bAvg)}（${weekendCmp.bN}日）</td>
+      </tr>
+    `);
+  }
+
+  // 負荷別・活動量別（後の眠気）
+  const loadDefs = [
+    ['身体的負荷', 'physicalLoad'],
+    ['精神的負荷', 'mentalLoad']
+  ];
+
+  loadDefs.forEach(([label, field]) => {
+    ['小', '中', '大'].forEach(level => {
+      const group = current.filter(x => x[field] === level);
+      const avg = average(group.map(x => x.laterSleepiness));
+      const n = numList(group.map(x => x.laterSleepiness)).length;
+      if (n > 0) {
+        cmpRows.push(`
+          <tr>
+            <td>${label}「${level}」の日 → 後の眠気</td>
+            <td class="num" colspan="2">${fmtScore(avg)}（${n}日）</td>
+          </tr>
+        `);
       }
-    );
+    });
+  });
 
+  ['少ない', '普通', '多い'].forEach(level => {
+    const group = current.filter(x => x.activityLevel === level);
+    const avg = average(group.map(x => x.laterSleepiness));
+    const n = numList(group.map(x => x.laterSleepiness)).length;
+    if (n > 0) {
+      cmpRows.push(`
+        <tr>
+          <td>活動量「${level}」の日 → 後の眠気</td>
+          <td class="num" colspan="2">${fmtScore(avg)}（${n}日）</td>
+        </tr>
+      `);
+    }
+  });
 
-  const nightSleepValues =
-    recent
-
-      .map(
-        getNightSleepMinutes
-      )
-
-      .filter(
-        x =>
-          x !== null
-      );
-
-
-  const resleepValues =
-    recent
-
-      .map(
-        getResleepMinutes
-      )
-
-      .filter(
-        x =>
-          x !== null
-      );
-
-
-  const napValues =
-    recent
-
-      .map(
-        getNapMinutes
-      )
-
-      .filter(
-        x =>
-          x !== null
-      );
-
-
-  const totalSleepValues =
-    recent
-
-      .map(
-        getTotalSleepMinutes
-      )
-
-      .filter(
-        x =>
-          x !== null
-      );
-
-
-  const avgNightSleep =
-    average(
-      nightSleepValues
-    );
-
-
-  const avgResleep =
-    average(
-      resleepValues
-    );
-
-
-  const avgNap =
-    average(
-      napValues
-    );
-
-
-  const avgTotalSleep =
-    average(
-      totalSleepValues
-    );
-
-
-  const wakeSleepiness =
-    average(
-      recent.map(
-        x =>
-          x.wakeSleepiness
-      )
-    );
-
-
-  const laterSleepiness =
-    average(
-      recent.map(
-        x =>
-          x.laterSleepiness
-      )
-    );
-
-
-  const nightSleepiness =
-    average(
-      recent.map(
-        x =>
-          x.nightSleepiness
-      )
-    );
-
-
-  function averageForLoad(
-    field,
-    value
-  ) {
-
-    return average(
-
-      recent
-
-        .filter(
-          x =>
-            x[field] === value
-        )
-
-        .map(
-          x =>
-            x.laterSleepiness
-        )
-
-    );
-
+  if (cmpRows.length) {
+    html += `<table class="cmpTable">${cmpRows.join('')}</table>`;
+  } else {
+    html += '<p class="subtle">比べられる記録がまだ足りません。</p>';
   }
 
+  /* ===== その他 ===== */
+  html += '<h3>その他</h3>';
 
-  const physicalSmall =
-    averageForLoad(
-      'physicalLoad',
-      '小'
-    );
+  html += metricBlock('飲酒あり', `${cur.alcoholDays}日`, '', '');
+  html += metricBlock('服薬時刻の記録あり', `${cur.medicationDays}日`, '', '');
 
-
-  const physicalMedium =
-    averageForLoad(
-      'physicalLoad',
-      '中'
-    );
-
-
-  const physicalLarge =
-    averageForLoad(
-      'physicalLoad',
-      '大'
-    );
-
-
-  const mentalSmall =
-    averageForLoad(
-      'mentalLoad',
-      '小'
-    );
-
-
-  const mentalMedium =
-    averageForLoad(
-      'mentalLoad',
-      '中'
-    );
-
-
-  const mentalLarge =
-    averageForLoad(
-      'mentalLoad',
-      '大'
-    );
-
-
-  const tagCount = {};
-
-
-  recent.forEach(
-    item => {
-
-      (
-        item.tags || []
-      )
-      .forEach(
-        tag => {
-
-          tagCount[tag] =
-            (
-              tagCount[tag] || 0
-            ) + 1;
-
-        }
-      );
-
-    }
-  );
-
-
-  const tagSummary =
-    Object.entries(
-      tagCount
+  const tagSummary = Object.entries(cur.tagCount)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag, count]) =>
+      `<span class="tag">${esc(tag)}：${count}日</span>`
     )
-
-    .sort(
-      (a, b) =>
-        b[1] - a[1]
-    )
-
-    .map(
-      ([tag, count]) =>
-
-        `<span class="tag">
-          ${esc(tag)}：${count}日
-        </span>`
-
-    )
-
     .join('');
 
-
-  const napDays =
-    recent.filter(
-      x =>
-        x.napText &&
-        x.napText.trim()
-    ).length;
-
-
-  const resleepDays =
-    recent.filter(
-      x =>
-        x.resleep &&
-        x.resleep.trim()
-    ).length;
-
-
-  const alcoholDays =
-    recent.filter(
-      x =>
-        x.alcohol === 'あり'
-    ).length;
-
-
-  const medicationDays =
-    recent.filter(
-      x =>
-        x.medTime &&
-        x.medTime.trim()
-    ).length;
-
-
-  stats.innerHTML = `
-
+  html += `
     <div class="metric">
-
-      <div>
-        分析対象
-      </div>
-
-      <strong>
-        ${recent.length}日
-      </strong>
-
-      <div>
-        直近7日間
-      </div>
-
+      <div>タグ</div>
+      <div style="margin-top:5px;">${tagSummary || 'まだありません'}</div>
     </div>
-
-
-    <h3>
-      睡眠時間
-    </h3>
-
-
-    <div class="metric">
-
-      <div>
-        平均・夜間睡眠
-      </div>
-
-      <strong>
-        ${formatDuration(
-          avgNightSleep
-        )}
-      </strong>
-
-      <div class="subtle">
-        入眠 → 最初の覚醒
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        平均・二度寝
-      </div>
-
-      <strong>
-        ${formatDuration(
-          avgResleep
-        )}
-      </strong>
-
-      <div class="subtle">
-        記録がある日の平均
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        平均・昼寝
-      </div>
-
-      <strong>
-        ${formatDuration(
-          avgNap
-        )}
-      </strong>
-
-      <div class="subtle">
-        記録がある日の平均
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        平均・24時間総睡眠
-      </div>
-
-      <strong>
-        ${formatDuration(
-          avgTotalSleep
-        )}
-      </strong>
-
-      <div class="subtle">
-        夜間睡眠＋二度寝＋昼寝
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        二度寝あり
-      </div>
-
-      <strong>
-        ${resleepDays}
-      </strong>
-
-      日
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        昼寝あり
-      </div>
-
-      <strong>
-        ${napDays}
-      </strong>
-
-      日
-
-    </div>
-
-
-    <h3>
-      眠気
-    </h3>
-
-
-    <div class="metric">
-
-      <div>
-        平均・起床直後の眠気
-      </div>
-
-      <strong>
-        ${
-          wakeSleepiness === null
-            ? '—'
-            : wakeSleepiness.toFixed(1)
-        }
-      </strong>
-
-      <div>
-        0〜10
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        平均・起床後しばらくしてからの眠気
-      </div>
-
-      <strong>
-        ${
-          laterSleepiness === null
-            ? '—'
-            : laterSleepiness.toFixed(1)
-        }
-      </strong>
-
-      <div>
-        0〜10
-      </div>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        平均・夜の眠気
-      </div>
-
-      <strong>
-        ${
-          nightSleepiness === null
-            ? '—'
-            : nightSleepiness.toFixed(1)
-        }
-      </strong>
-
-      <div>
-        0〜10
-      </div>
-
-    </div>
-
-
-    <h3>
-      負荷と眠気
-    </h3>
-
-
-    <div class="metric">
-
-      <div>
-        身体的負荷「小」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          physicalSmall === null
-            ? '—'
-            : physicalSmall.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        身体的負荷「中」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          physicalMedium === null
-            ? '—'
-            : physicalMedium.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        身体的負荷「大」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          physicalLarge === null
-            ? '—'
-            : physicalLarge.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        精神的負荷「小」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          mentalSmall === null
-            ? '—'
-            : mentalSmall.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        精神的負荷「中」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          mentalMedium === null
-            ? '—'
-            : mentalMedium.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        精神的負荷「大」→ 後の眠気
-      </div>
-
-      <strong>
-        ${
-          mentalLarge === null
-            ? '—'
-            : mentalLarge.toFixed(1)
-        }
-      </strong>
-
-    </div>
-
-
-    <h3>
-      その他
-    </h3>
-
-
-    <div class="metric">
-
-      飲酒あり：
-
-      <strong>
-        ${alcoholDays}
-      </strong>
-
-      日
-
-    </div>
-
-
-    <div class="metric">
-
-      服薬時刻の記録あり：
-
-      <strong>
-        ${medicationDays}
-      </strong>
-
-      日
-
-    </div>
-
-
-    <div class="metric">
-
-      <div>
-        タグ
-      </div>
-
-      <div style="margin-top:5px;">
-        ${
-          tagSummary ||
-          'まだありません'
-        }
-      </div>
-
-    </div>
-
   `;
 
+  stats.innerHTML = html;
 
-  const insightTexts = [];
+  /* ===== グラフ ===== */
+  charts.innerHTML =
+    buildChart('日ごとの24時間総睡眠', current, getTotalSleepMinutes, 720, 'bar', v => formatDuration(v)) +
+    buildChart('日ごとの「起床後の眠気」', current, x => {
+      const n = Number(x.laterSleepiness);
+      return x.laterSleepiness === '' || x.laterSleepiness === null || x.laterSleepiness === undefined || isNaN(n)
+        ? null : n * 60; // バーの高さ計算用に分換算（10点=600）
+    }, 600, 'bar sleepy', v => (v / 60).toFixed(1));
 
+  /* ===== メモ（自動の気づき） ===== */
+  const texts = [];
 
-  if (
-    physicalLarge !== null &&
-    physicalSmall !== null
-  ) {
-
-    if (
-      physicalLarge >
-      physicalSmall
-    ) {
-
-      insightTexts.push(
-        'この7日間では、身体的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
-      );
-
-    } else {
-
-      insightTexts.push(
-        'この7日間では、身体的負荷「大」の日の後の眠気が、負荷「小」の日より高いとは限りません。'
-      );
-
-    }
-
-  }
-
-
-  if (
-    mentalLarge !== null &&
-    mentalSmall !== null
-  ) {
-
-    if (
-      mentalLarge >
-      mentalSmall
-    ) {
-
-      insightTexts.push(
-        'この7日間では、精神的負荷が「大」の日のほうが、負荷「小」の日より後の眠気が高い傾向があります。'
-      );
-
-    } else {
-
-      insightTexts.push(
-        'この7日間では、精神的負荷「大」の日の後の眠気が、負荷「小」の日より高いとは限りません。'
-      );
-
-    }
-
-  }
-
-
-  if (
-    avgNightSleep !== null &&
-    avgTotalSleep !== null &&
-    avgTotalSleep >
-      avgNightSleep
-  ) {
-
-    insightTexts.push(
-      `夜間睡眠の平均は${formatDuration(avgNightSleep)}ですが、二度寝・昼寝を含む24時間総睡眠は平均${formatDuration(avgTotalSleep)}です。`
+  function cmpInsight(label, cmp, formatter, threshold, unitNote) {
+    if (cmp.aN < 3 || cmp.bN < 3) return;
+    if (cmp.aAvg === null || cmp.bAvg === null) return;
+    const diff = cmp.aAvg - cmp.bAvg;
+    if (Math.abs(diff) < threshold) return;
+    const direction = diff > 0 ? '高い（長い）' : '低い（短い）';
+    texts.push(
+      `この期間では、${label}は、そうでない日より平均で${formatter(Math.abs(diff))}${unitNote}傾向があります（ある日 ${formatter(cmp.aAvg)}／ない日 ${formatter(cmp.bAvg)}）。`
     );
-
   }
 
+  cmpInsight(
+    '飲酒した日の夜間睡眠',
+    compareGroups(current, x => x.alcohol === 'あり', getNightSleepMinutes),
+    formatDuration, 20, 'の差があり、'
+  );
 
-  if (
-    avgTotalSleep !== null &&
-    laterSleepiness !== null
-  ) {
+  cmpInsight(
+    '昼寝した日の「後の眠気」',
+    compareGroups(current, x => (getNapMinutes(x) || 0) > 0, x => x.laterSleepiness),
+    v => v.toFixed(1), 0.5, 'ポイントの差があり、'
+  );
 
-    insightTexts.push(
-      `24時間総睡眠は平均${formatDuration(avgTotalSleep)}、起床後しばらくしてからの眠気は平均${laterSleepiness.toFixed(1)}/10です。`
-    );
+  cmpInsight(
+    '二度寝した日の「後の眠気」',
+    compareGroups(current, x => (getResleepMinutes(x) || 0) > 0, x => x.laterSleepiness),
+    v => v.toFixed(1), 0.5, 'ポイントの差があり、'
+  );
 
+  // 期間の前半・後半の変化
+  if (current.length >= 6) {
+    const half = Math.floor(current.length / 2);
+    const firstAvg = average(current.slice(0, half).map(getTotalSleepMinutes));
+    const secondAvg = average(current.slice(half).map(getTotalSleepMinutes));
+    if (firstAvg !== null && secondAvg !== null &&
+        Math.abs(secondAvg - firstAvg) >= 20) {
+      texts.push(
+        `期間の後半は前半より、24時間総睡眠が平均${formatDuration(Math.abs(secondAvg - firstAvg))}${secondAvg > firstAvg ? '長く' : '短く'}なっています（前半 ${formatDuration(firstAvg)} → 後半 ${formatDuration(secondAvg)}）。`
+      );
+    }
   }
 
+  if (hasPrev) {
+    const dTotal = (average(cur.total) ?? NaN) - (average(prev.total) ?? NaN);
+    if (!isNaN(dTotal) && Math.abs(dTotal) >= 20) {
+      texts.push(
+        `前期間と比べると、24時間総睡眠の平均は${formatDuration(Math.abs(dTotal))}${dTotal > 0 ? '増えて' : '減って'}います。`
+      );
+    }
+    const dLater = (average(cur.laterSleepiness) ?? NaN) - (average(prev.laterSleepiness) ?? NaN);
+    if (!isNaN(dLater) && Math.abs(dLater) >= 0.5) {
+      texts.push(
+        `前期間と比べると、「起床後しばらくしてからの眠気」の平均は${Math.abs(dLater).toFixed(1)}ポイント${dLater > 0 ? '増えて' : '減って'}います。`
+      );
+    }
+  }
 
-  insightTexts.push(
+  texts.push(
     'ここで表示しているのは記録上の「傾向」です。日数が少ない段階では、原因や因果関係までは判断できません。'
   );
 
-
   insights.innerHTML =
     '<h3>メモ</h3>' +
+    texts.map(x => `<div class="insight">${esc(x)}</div>`).join('');
+}
 
-    insightTexts
+/* 日次バーチャート（CSSのみ） */
+function buildChart(title, records, getter, maxMinutes, barClass, formatVal) {
 
-      .map(
-        x =>
-          `<div class="insight">
-            ${esc(x)}
-          </div>`
-      )
+  if (!records.length) return '';
 
-      .join('');
+  const dense = records.length > 45;
 
+  const bars = records.map(item => {
+    const v = getter(item);
+    if (v === null || v === undefined || isNaN(v)) {
+      return `<div class="barWrap" style="${dense ? 'flex-basis:4px;min-width:4px;' : ''}"><div class="bar empty" style="height:4%"></div></div>`;
+    }
+    const pct = Math.max(3, Math.min(100, (v / maxMinutes) * 100));
+    return `<div class="barWrap" style="${dense ? 'flex-basis:4px;min-width:4px;' : ''}" title="${esc(item.sleepDate)}：${esc(formatVal(v))}"><div class="${barClass}" style="height:${pct}%"></div></div>`;
+  }).join('');
+
+  const labels = records.map(item =>
+    `<span style="${dense ? 'flex-basis:4px;min-width:4px;' : ''}">${formatDateShort(item.sleepDate)}</span>`
+  ).join('');
+
+  return `
+    <div class="chartBox">
+      <div class="chartTitle">${title}</div>
+      <div class="bars">${bars}</div>
+      <div class="barLabels">${labels}</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   CSV書き出し
+========================================================= */
+
+function exportCSV() {
+
+  const records = getSortedRecords();
+
+  if (!records.length) {
+    alert('書き出せる記録がありません。');
+    return;
+  }
+
+  const header = [
+    '記録日', '就床', '入眠', '最初の覚醒', '最終起床',
+    'ベッドを出た', '通常活動に戻れた',
+    '夜間睡眠(分)', '二度寝(分)', '昼寝(分)', '24時間総睡眠(分)',
+    'ベッド滞在(分)', '入眠潜時(分)',
+    '夜の眠気', '起床直後の眠気', '後の眠気', '起床後の回復感',
+    '朝の光', 'カフェイン', '活動量', '身体的負荷', '精神的負荷',
+    '服薬時刻', '飲酒', '酒の種類', '酒の量', '度数', '飲酒開始', '飲酒終了',
+    'タグ', '起床時メモ', '睡眠メモ', 'その他メモ'
+  ];
+
+  const csvCell = v => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+
+  const cellNum = v => (v === null || v === undefined || isNaN(v) ? '' : String(Math.round(v)));
+
+  const lines = [header.join(',')];
+
+  records.forEach(item => {
+    lines.push([
+      item.sleepDate || '',
+      item.bedTime || '',
+      item.sleepTime || '',
+      item.attemptWake || '',
+      item.finalWake || '',
+      item.getUpTime || '',
+      item.normalTime || '',
+      cellNum(getNightSleepMinutes(item)),
+      cellNum(getResleepMinutes(item)),
+      cellNum(getNapMinutes(item)),
+      cellNum(getTotalSleepMinutes(item)),
+      cellNum(getTimeInBedMinutes(item)),
+      cellNum(getSleepLatencyMinutes(item)),
+      item.nightSleepiness ?? '',
+      item.wakeSleepiness ?? '',
+      item.laterSleepiness ?? '',
+      item.wakeRecovery || '',
+      item.lightTime || '',
+      item.caffeineText || '',
+      item.activityLevel || '',
+      item.physicalLoad || '',
+      item.mentalLoad || '',
+      item.medTime || '',
+      item.alcohol || '',
+      item.alcoholType || '',
+      item.alcoholAmount || '',
+      item.alcoholAbv || '',
+      item.alcoholStart || '',
+      item.alcoholEnd || '',
+      (item.tags || []).join(' '),
+      item.wakeNote || '',
+      item.sleepMemo || '',
+      item.sleepMemo2 || ''
+    ].map(csvCell).join(','));
+  });
+
+  const csv = '﻿' + lines.join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sleep-log-' + todayString() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 
@@ -3897,78 +2754,35 @@ function renderStats() {
 ========================================================= */
 
 function render() {
-
   renderHistory();
-
   renderStats();
-
   updateBackupInfo();
-
 }
-
 
 /* =========================================================
    タブ
 ========================================================= */
 
-function activateTab(
-  id,
-  btnId
-) {
+function activateTab(id, btnId) {
 
-  const section =
-    $(id);
-
-
+  const section = $(id);
   if (!section) return;
 
+  document
+    .querySelectorAll('main > section')
+    .forEach(x => x.classList.add('hidden'));
+
+  section.classList.remove('hidden');
 
   document
-    .querySelectorAll(
-      'main > section'
-    )
-    .forEach(
-      x =>
-        x.classList.add(
-          'hidden'
-        )
-    );
+    .querySelectorAll('.tab')
+    .forEach(x => x.classList.remove('active'));
 
-
-  section.classList.remove(
-    'hidden'
-  );
-
-
-  document
-    .querySelectorAll(
-      '.tab'
-    )
-    .forEach(
-      x =>
-        x.classList.remove(
-          'active'
-        )
-    );
-
-
-  const btn =
-    $(btnId);
-
-
-  if (btn) {
-
-    btn.classList.add(
-      'active'
-    );
-
-  }
-
+  const btn = $(btnId);
+  if (btn) btn.classList.add('active');
 
   render();
-
 }
-
 
 /* =========================================================
    手動バックアップ
@@ -3977,178 +2791,60 @@ function activateTab(
 function backupData() {
 
   const backup = {
-
-    app:
-      'Sleep Log',
-
-    schemaVersion:
-      SCHEMA_VERSION,
-
-    exportedAt:
-      new Date().toISOString(),
-
-    data:
-      db
-
+    app: 'Sleep Log',
+    schemaVersion: SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    data: db
   };
 
+  const json = JSON.stringify(backup, null, 2);
 
-  const json =
-    JSON.stringify(
-      backup,
-      null,
-      2
-    );
+  const blob = new Blob([json], { type: 'application/json' });
 
+  const filename = createBackupFilename();
 
-  const blob =
-    new Blob(
-      [json],
-      {
-        type:
-          'application/json'
-      }
-    );
-
-
-  const filename =
-    createBackupFilename();
-
-
-  /*
-    iPhone Safariなどで
-    ファイル共有を使える場合
-  */
-
-  if (
-    navigator.share &&
-    navigator.canShare
-  ) {
+  if (navigator.share && navigator.canShare) {
 
     try {
 
-      const file =
-        new File(
-          [blob],
-          filename,
-          {
-            type:
-              'application/json'
-          }
-        );
+      const file = new File([blob], filename, {
+        type: 'application/json'
+      });
 
-
-      if (
-        navigator.canShare({
-          files: [file]
-        })
-      ) {
+      if (navigator.canShare({ files: [file] })) {
 
         navigator
           .share({
-
-            title:
-              'Sleep Log バックアップ',
-
-            text:
-              'Sleep Logのバックアップ',
-
-            files:
-              [file]
-
+            title: 'Sleep Log バックアップ',
+            text: 'Sleep Logのバックアップ',
+            files: [file]
           })
-
-          .then(
-            () => {}
-          )
-
-          .catch(
-            error => {
-
-              /*
-                ユーザーが共有をキャンセルした場合は
-                何もしない。
-              */
-
-              console.log(
-                '共有がキャンセルされました。',
-                error
-              );
-
-            }
-          );
-
+          .then(() => {})
+          .catch(error => {
+            console.log('共有がキャンセルされました。', error);
+          });
 
         return;
-
       }
 
     } catch (error) {
-
-      console.warn(
-        '共有機能を利用できませんでした。',
-        error
-      );
-
+      console.warn('共有機能を利用できませんでした。', error);
     }
-
   }
 
+  const url = URL.createObjectURL(blob);
 
-  /*
-    共有機能が使えない場合は
-    通常のファイルダウンロード
-  */
-
-  const url =
-    URL.createObjectURL(
-      blob
-    );
-
-
-  const a =
-    document.createElement(
-      'a'
-    );
-
-
-  a.href =
-    url;
-
-
-  a.download =
-    filename;
-
-
-  document.body.appendChild(
-    a
-  );
-
-
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
-
-
   a.remove();
 
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-  setTimeout(
-    () => {
-
-      URL.revokeObjectURL(
-        url
-      );
-
-    },
-    1000
-  );
-
-
-  alert(
-    'バックアップファイルを作成しました。'
-  );
-
+  alert('バックアップファイルを作成しました。');
 }
-
 
 /* =========================================================
    バックアップファイル名
@@ -4156,150 +2852,39 @@ function backupData() {
 
 function createBackupFilename() {
 
-  const d =
-    new Date();
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const sec = String(d.getSeconds()).padStart(2, '0');
 
-
-  const y =
-    d.getFullYear();
-
-
-  const m =
-    String(
-      d.getMonth() + 1
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  const day =
-    String(
-      d.getDate()
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  const h =
-    String(
-      d.getHours()
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  const min =
-    String(
-      d.getMinutes()
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  const sec =
-    String(
-      d.getSeconds()
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  return (
-    `sleep-log-backup-` +
-    `${y}-${m}-${day}-` +
-    `${h}${min}${sec}.json`
-  );
-
+  return `sleep-log-backup-${y}-${m}-${day}-${h}${min}${sec}.json`;
 }
-
 
 /* =========================================================
    バックアップ形式チェック
 ========================================================= */
 
-function validateBackup(
-  backup
-) {
+function validateBackup(backup) {
 
-  if (
-    !backup ||
-    typeof backup !== 'object'
-  ) {
-
-    return false;
-
-  }
-
-
-  if (
-    backup.app !==
-    'Sleep Log'
-  ) {
-
-    return false;
-
-  }
-
-
-  if (
-    !backup.data ||
-    typeof backup.data !==
-      'object'
-  ) {
-
-    return false;
-
-  }
-
-
-  if (
-    !Array.isArray(
-      backup.data.diary
-    )
-  ) {
-
-    return false;
-
-  }
-
+  if (!backup || typeof backup !== 'object') return false;
+  if (backup.app !== 'Sleep Log') return false;
+  if (!backup.data || typeof backup.data !== 'object') return false;
+  if (!Array.isArray(backup.data.diary)) return false;
 
   return true;
-
 }
-
 
 /* =========================================================
    バックアップデータを整える
 ========================================================= */
 
-function prepareRestoredDB(
-  restored
-) {
-
-  /*
-    元データを直接変更しないよう
-    JSON経由でコピーする。
-  */
-
-  const copy =
-    JSON.parse(
-      JSON.stringify(
-        restored
-      )
-    );
-
-
-  return normalizeDB(
-    copy
-  );
-
+function prepareRestoredDB(restored) {
+  const copy = JSON.parse(JSON.stringify(restored));
+  return normalizeDB(copy);
 }
-
 
 /* =========================================================
    JSONバックアップ復元
@@ -4309,115 +2894,49 @@ function restoreData(file) {
 
   if (!file) return;
 
+  const reader = new FileReader();
 
-  const reader =
-    new FileReader();
+  reader.onload = function (event) {
 
+    try {
 
-  reader.onload =
-    function(event) {
+      const backup = JSON.parse(event.target.result);
 
-      try {
-
-        const backup =
-          JSON.parse(
-            event.target.result
-          );
-
-
-        if (
-          !validateBackup(
-            backup
-          )
-        ) {
-
-          alert(
-            'このファイルはSleep Logのバックアップとして認識できません。'
-          );
-
-          return;
-
-        }
-
-
-        const restored =
-          prepareRestoredDB(
-            backup.data
-          );
-
-
-        const ok =
-          confirm(
-
-            `このバックアップを復元しますか？\n\n` +
-
-            `睡眠記録：${restored.diary.length}件\n\n` +
-
-            `現在のデータは上書きされます。\n` +
-
-            `現在のデータは復元前に自動バックアップされます。`
-
-          );
-
-
-        if (!ok) {
-
-          return;
-
-        }
-
-
-        /*
-          現在のデータを退避
-        */
-
-        backupBeforeChange();
-
-
-        /*
-          復元
-        */
-
-        db =
-          restored;
-
-
-        saveDB();
-
-
-        resetForm();
-
-
-        render();
-
-
-        alert(
-          'バックアップから復元しました。'
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        alert(
-          'バックアップファイルを読み込めませんでした。'
-        );
-
+      if (!validateBackup(backup)) {
+        alert('このファイルはSleep Logのバックアップとして認識できません。');
+        return;
       }
 
-    };
+      const restored = prepareRestoredDB(backup.data);
 
+      const ok = confirm(
+        `このバックアップを復元しますか？\n\n` +
+        `睡眠記録：${restored.diary.length}件\n\n` +
+        `現在のデータは上書きされます。\n` +
+        `現在のデータは復元前に自動バックアップされます。`
+      );
 
-  reader.readAsText(
-    file
-  );
+      if (!ok) return;
 
+      backupBeforeChange();
+
+      db = restored;
+
+      saveDB();
+      resetForm();
+      render();
+
+      alert('バックアップから復元しました。');
+
+    } catch (error) {
+
+      console.error(error);
+      alert('バックアップファイルを読み込めませんでした。');
+    }
+  };
+
+  reader.readAsText(file);
 }
-
 
 /* =========================================================
    自動バックアップ復元
@@ -4425,356 +2944,156 @@ function restoreData(file) {
 
 function restoreAutoBackup() {
 
-  const raw =
-    localStorage.getItem(
-      AUTO_BACKUP_KEY
-    );
-
+  const raw = localStorage.getItem(AUTO_BACKUP_KEY);
 
   if (!raw) {
-
-    alert(
-      '直前の自動バックアップはありません。'
-    );
-
+    alert('直前の自動バックアップはありません。');
     return;
-
   }
-
 
   try {
 
-    const backup =
-      JSON.parse(
-        raw
-      );
+    const backup = JSON.parse(raw);
 
-
-    if (
-      !backup.data
-    ) {
-
-      alert(
-        '自動バックアップを読み込めませんでした。'
-      );
-
+    if (!backup.data) {
+      alert('自動バックアップを読み込めませんでした。');
       return;
-
     }
 
+    const restored = prepareRestoredDB(backup.data);
+    const date = new Date(backup.savedAt);
 
-    const restored =
-      prepareRestoredDB(
-        backup.data
-      );
+    const ok = confirm(
+      `直前の自動バックアップを復元しますか？\n\n` +
+      `バックアップ日時：${date.toLocaleString('ja-JP')}\n` +
+      `睡眠記録：${restored.diary.length}件\n\n` +
+      `現在のデータは上書きされます。`
+    );
 
-
-    const date =
-      new Date(
-        backup.savedAt
-      );
-
-
-    const ok =
-      confirm(
-
-        `直前の自動バックアップを復元しますか？\n\n` +
-
-        `バックアップ日時：${date.toLocaleString('ja-JP')}\n` +
-
-        `睡眠記録：${restored.diary.length}件\n\n` +
-
-        `現在のデータは上書きされます。`
-
-      );
-
-
-    if (!ok) {
-
-      return;
-
-    }
-
-
-    /*
-      復元前に現在のデータを
-      さらに自動バックアップする。
-
-      これにより、間違って復元しても
-      もう一度戻せる可能性がある。
-    */
+    if (!ok) return;
 
     backupBeforeChange();
 
-
-    db =
-      restored;
-
+    db = restored;
 
     saveDB();
-
-
     resetForm();
-
-
     render();
 
-
-    alert(
-      '自動バックアップから復元しました。'
-    );
-
+    alert('自動バックアップから復元しました。');
 
   } catch (error) {
 
-    console.error(
-      error
-    );
-
-
-    alert(
-      '自動バックアップを読み込めませんでした。'
-    );
-
+    console.error(error);
+    alert('自動バックアップを読み込めませんでした。');
   }
-
 }
-
 
 /* =========================================================
    イベント
 ========================================================= */
 
-$('tabLog')
-  .addEventListener(
-    'click',
-    () =>
-      activateTab(
-        'log',
-        'tabLog'
-      )
-  );
-
-
-$('tabHistory')
-  .addEventListener(
-    'click',
-    () =>
-      activateTab(
-        'history',
-        'tabHistory'
-      )
-  );
-
-
-$('tabAnalysis')
-  .addEventListener(
-    'click',
-    () =>
-      activateTab(
-        'analysis',
-        'tabAnalysis'
-      )
-  );
-
-
-$('saveDiaryBtn')
-  .addEventListener(
-    'click',
-    addSleepDiary
-  );
-
-
-$('cancelEditBtn')
-  .addEventListener(
-    'click',
-    resetForm
-  );
-
-
-/* =========================================================
-   睡眠時間プレビュー更新
-========================================================= */
-
-[
-  'sleepTime',
-  'finalWake',
-  'attemptWake',
-  'resleep',
-  'napText'
-]
-.forEach(
-  id => {
-
-    $(id)
-      .addEventListener(
-        'input',
-        updateSleepPreview
-      );
-
-    $(id)
-      .addEventListener(
-        'change',
-        updateSleepPreview
-      );
-
-  }
+$('tabLog').addEventListener('click', () =>
+  activateTab('log', 'tabLog')
 );
 
+$('tabHistory').addEventListener('click', () =>
+  activateTab('history', 'tabHistory')
+);
 
-/* =========================================================
-   バックアップボタン
-========================================================= */
+$('tabAnalysis').addEventListener('click', () =>
+  activateTab('analysis', 'tabAnalysis')
+);
 
-$('backupBtn')
-  .addEventListener(
-    'click',
-    backupData
+$('saveDiaryBtn').addEventListener('click', addSleepDiary);
+
+$('cancelEditBtn').addEventListener('click', resetForm);
+
+/* 期間切替（分析） */
+$('periodBar').addEventListener('click', event => {
+
+  const btn = event.target.closest('[data-period]');
+  if (!btn) return;
+
+  analysisPeriod = btn.dataset.period;
+
+  document
+    .querySelectorAll('#periodBar .periodBtn')
+    .forEach(b => b.classList.toggle('active', b === btn));
+
+  renderStats();
+});
+
+/* 睡眠時間プレビュー更新 */
+[
+  'sleepTime', 'finalWake', 'attemptWake', 'resleep', 'napText'
+].forEach(id => {
+  $(id).addEventListener('input', updateSleepPreview);
+  $(id).addEventListener('change', updateSleepPreview);
+});
+
+/* バックアップ・書き出しボタン */
+$('backupBtn').addEventListener('click', backupData);
+
+$('csvBtn').addEventListener('click', exportCSV);
+
+$('restoreBtn').addEventListener('click', () => {
+  $('restoreFile').click();
+});
+
+$('restoreFile').addEventListener('change', event => {
+  const file = event.target.files[0];
+  restoreData(file);
+  event.target.value = '';
+});
+
+$('restoreAutoBtn').addEventListener('click', restoreAutoBackup);
+
+/* 全データ削除 */
+$('clearAllBtn').addEventListener('click', () => {
+
+  const ok = confirm(
+    'すべての睡眠記録を削除しますか？\n\n' +
+    '削除前のデータは自動バックアップされます。'
   );
 
+  if (!ok) return;
 
-$('restoreBtn')
-  .addEventListener(
-    'click',
-    () => {
+  backupBeforeChange();
 
-      $('restoreFile').click();
+  db = createEmptyDB();
 
-    }
-  );
+  saveDB();
+  resetForm();
+  render();
+});
 
+/* 履歴の編集・削除 */
+$('historyList').addEventListener('click', event => {
 
-$('restoreFile')
-  .addEventListener(
-    'change',
-    event => {
+  const editButton = event.target.closest('[data-edit-id]');
 
-      const file =
-        event.target.files[0];
+  if (editButton) {
+    editDiary(editButton.dataset.editId);
+    return;
+  }
 
+  const deleteButton = event.target.closest('[data-delete-id]');
 
-      restoreData(
-        file
-      );
-
-
-      /*
-        同じファイルをもう一度
-        選べるようにする
-      */
-
-      event.target.value =
-        '';
-
-    }
-  );
-
-
-$('restoreAutoBtn')
-  .addEventListener(
-    'click',
-    restoreAutoBackup
-  );
-
-
-/* =========================================================
-   全データ削除
-========================================================= */
-
-$('clearAllBtn')
-  .addEventListener(
-    'click',
-    () => {
-
-      const ok =
-        confirm(
-
-          'すべての睡眠記録を削除しますか？\n\n' +
-
-          '削除前のデータは自動バックアップされます。'
-
-        );
-
-
-      if (!ok) return;
-
-
-      backupBeforeChange();
-
-
-      db =
-        createEmptyDB();
-
-
-      saveDB();
-
-
-      resetForm();
-
-
-      render();
-
-    }
-  );
-
-
-/* =========================================================
-   履歴の編集・削除
-========================================================= */
-
-$('historyList')
-  .addEventListener(
-    'click',
-    event => {
-
-      const editButton =
-        event.target.closest(
-          '[data-edit-id]'
-        );
-
-
-      if (editButton) {
-
-        editDiary(
-          editButton.dataset.editId
-        );
-
-        return;
-
-      }
-
-
-      const deleteButton =
-        event.target.closest(
-          '[data-delete-id]'
-        );
-
-
-      if (deleteButton) {
-
-        deleteDiary(
-          deleteButton.dataset.deleteId
-        );
-
-      }
-
-    }
-  );
-
+  if (deleteButton) {
+    deleteDiary(deleteButton.dataset.deleteId);
+  }
+});
 
 /* =========================================================
    初期化
 ========================================================= */
 
-$('sleepDate').value =
-  todayString();
-
+$('sleepDate').value = todayString();
 
 render();
 
-
 updateSleepPreview();
-
 
 </script>
 
